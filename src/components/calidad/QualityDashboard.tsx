@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Filter, Search, AlertTriangle, Clock, CheckCircle2,
   ChevronRight, Shield, MapPin, Users, Calendar, ArrowUpRight,
-  Eye, XCircle, Building2
+  Eye, XCircle, Building2, Download, FileText, FileSpreadsheet, ChevronDown
 } from 'lucide-react';
 import { MOCK_FINDINGS } from '../../data/mockData';
 import { SECTORS } from '../../constants';
@@ -13,6 +13,7 @@ import { ProgressBar, UserProgressBar } from '../ui/ProgressBar';
 import { TimelineActivity } from '../ui/TimelineActivity';
 import { Modal } from '../ui/Modal';
 import type { Finding, FindingStatus } from '../../types';
+import { exportToPDF, exportToExcel } from '../../services/exportService';
 
 type TabFilter = 'all' | FindingStatus;
 
@@ -22,6 +23,7 @@ export function QualityDashboard() {
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   // ─── KPIs ───
   const kpis = useMemo(() => {
@@ -92,13 +94,72 @@ export function QualityDashboard() {
             Sistema de Acciones Correctivas y Oportunidades de Mejora — ISO 9001
           </p>
         </div>
-        <button
-          onClick={() => navigate('/calidad/nuevo')}
-          className="btn-primary"
-        >
-          <Plus className="w-4 h-4" />
-          Nuevo Hallazgo
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="btn-secondary gap-1.5"
+            >
+              <Download className="w-4 h-4" />
+              Exportar
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showExportMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-2xl border border-slate-200/60 z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+                  <div className="p-2">
+                    <button
+                      onClick={() => {
+                        exportToPDF(filteredFindings);
+                        setShowExportMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-red-50 hover:text-red-700 transition-all cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-red-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-xs">Exportar PDF</p>
+                        <p className="text-[10px] text-slate-400">Reporte con KPIs y tabla</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        exportToExcel(filteredFindings);
+                        setShowExportMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-green-50 hover:text-green-700 transition-all cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-xs">Exportar Excel</p>
+                        <p className="text-[10px] text-slate-400">Datos completos + resumen</p>
+                      </div>
+                    </button>
+                  </div>
+                  <div className="border-t border-slate-100 px-3 py-2">
+                    <p className="text-[9px] text-slate-400 font-medium">
+                      {filteredFindings.length} hallazgo{filteredFindings.length !== 1 ? 's' : ''} {activeTab !== 'all' ? '(filtrados)' : ''}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <button
+            onClick={() => navigate('/calidad/nuevo')}
+            className="btn-primary"
+          >
+            <Plus className="w-4 h-4" />
+            Nuevo Hallazgo
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
