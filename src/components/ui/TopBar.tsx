@@ -109,7 +109,8 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
           </div>
 
           {/* Role badge (desktop) */}
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-600 border border-purple-200">
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             <span className="text-[10px] font-bold uppercase tracking-widest">Admin</span>
           </div>
         </div>
