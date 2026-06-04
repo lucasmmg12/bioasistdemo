@@ -3,23 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import {
   Plus, Filter, Search, AlertTriangle, Clock, CheckCircle2,
   ChevronRight, Shield, MapPin, Users, Calendar, ArrowUpRight,
-  Eye, XCircle, Building2, Download, FileText, FileSpreadsheet, ChevronDown
+  Eye, XCircle, Building2, Download, FileText, FileSpreadsheet, ChevronDown,
+  Send, UserPlus
 } from 'lucide-react';
-import { MOCK_FINDINGS } from '../../data/mockData';
 import { SECTORS } from '../../constants';
 import { KpiCard } from '../ui/KpiCard';
 import { StatusBadge, PriorityBadge } from '../ui/StatusBadge';
 import { ProgressBar, UserProgressBar } from '../ui/ProgressBar';
 import { TimelineActivity } from '../ui/TimelineActivity';
 import { Modal } from '../ui/Modal';
-import type { Finding, FindingStatus } from '../../types';
+import type { Finding, FindingStatus, Assignee } from '../../types';
 import { exportToPDF, exportToExcel, exportFindingToPDF } from '../../services/exportService';
+import { useFindings } from '../../contexts/FindingsContext';
+import { MOCK_USERS } from '../../data/mockData';
 
 type TabFilter = 'all' | FindingStatus;
 
 export function QualityDashboard() {
   const navigate = useNavigate();
-  const [findings] = useState<Finding[]>(MOCK_FINDINGS);
+  const { findings, assignTo, updateStatus, discardFinding } = useFindings();
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -294,7 +296,33 @@ export function QualityDashboard() {
         size="xl"
       >
         {selectedFinding && (
-          <FindingDetail finding={selectedFinding} />
+          <FindingDetail
+            finding={selectedFinding}
+            onDerived={(id, assignees) => {
+              assignTo(id, assignees);
+              // Refresh the selected finding from context
+              const updated = findings.find(f => f.id === id);
+              if (updated) setSelectedFinding({ ...updated, assigned_to: assignees, status: updated.status === 'pending' ? 'immediate_action' : updated.status });
+            }}
+            onValidated={(id) => {
+              const statusMap: Record<string, FindingStatus> = {
+                immediate_action: 'root_cause_analysis',
+                root_cause_analysis: 'corrective_plan',
+                corrective_plan: 'verification',
+                verification: 'effectiveness',
+                effectiveness: 'closed',
+              };
+              const current = findings.find(f => f.id === id);
+              if (current && statusMap[current.status]) {
+                updateStatus(id, statusMap[current.status]);
+                setSelectedFinding(null);
+              }
+            }}
+            onDiscarded={(id) => {
+              discardFinding(id);
+              setSelectedFinding(null);
+            }}
+          />
         )}
       </Modal>
     </div>
@@ -302,14 +330,52 @@ export function QualityDashboard() {
 }
 
 // ─── Finding Detail (inside modal) ───
-function FindingDetail({ finding }: { finding: Finding }) {
+interface FindingDetailProps {
+  finding: Finding;
+  onDerived: (id: string, assignees: Assignee[]) => void;
+  onValidated: (id: string) => void;
+  onDiscarded: (id: string) => void;
+}
+
+function FindingDetail({ finding, onDerived, onValidated, onDiscarded }: FindingDetailProps) {
   const getSectorLabel = (value: string) => SECTORS.find(s => s.value === value)?.label || value;
+  const [showDeriveModal, setShowDeriveModal] = useState(false);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const responded = finding.assigned_to.filter(a => a.responded).length;
   const total = finding.assigned_to.length;
 
+  // Available users to assign (not already assigned)
+  const assignedIds = new Set(finding.assigned_to.map(a => a.id));
+  const availableUsers = MOCK_USERS.filter(u => !assignedIds.has(u.id) && u.role !== 'admin');
+
+  const handleDerive = () => {
+    const newAssignees: Assignee[] = selectedUsers.map(uid => {
+      const user = MOCK_USERS.find(u => u.id === uid)!;
+      return {
+        id: user.id,
+        name: user.name,
+        sector: user.sector,
+        phone: '',
+        responded: false,
+      };
+    });
+    onDerived(finding.id, [...finding.assigned_to, ...newAssignees]);
+    setShowDeriveModal(false);
+    setSelectedUsers([]);
+  };
+
+  const NEXT_STATUS_LABELS: Record<string, string> = {
+    immediate_action: 'Análisis de Causa',
+    root_cause_analysis: 'Plan Correctivo',
+    corrective_plan: 'Verificación',
+    verification: 'Efectividad',
+    effectiveness: 'Cerrado',
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header info */}
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={finding.status} size="md" />
@@ -465,22 +531,97 @@ function FindingDetail({ finding }: { finding: Finding }) {
           Descargar PDF
         </button>
         {finding.status === 'pending' && (
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={() => setShowDeriveModal(true)}>
             <Users className="w-4 h-4" /> Derivar Hallazgo
           </button>
         )}
-        {['immediate_action', 'root_cause_analysis', 'corrective_plan'].includes(finding.status) && (
-          <button className="btn-accent">
-            <Eye className="w-4 h-4" /> Validar Etapa
+        {Object.keys(NEXT_STATUS_LABELS).includes(finding.status) && (
+          <button className="btn-accent" onClick={() => onValidated(finding.id)}>
+            <Eye className="w-4 h-4" /> Validar → {NEXT_STATUS_LABELS[finding.status]}
           </button>
         )}
         <div className="flex-1" />
         {finding.status !== 'closed' && finding.status !== 'discarded' && (
-          <button className="btn-ghost text-red-500 hover:text-red-600 hover:bg-red-50">
+          <button className="btn-ghost text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => setShowDiscardConfirm(true)}>
             <XCircle className="w-4 h-4" /> Descartar
           </button>
         )}
       </div>
+
+      {/* ── Derive Modal ── */}
+      {showDeriveModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowDeriveModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 fade-in duration-200" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-display font-bold text-bio-primary mb-1 flex items-center gap-2">
+              <UserPlus className="w-5 h-5" /> Derivar Hallazgo
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">Selecciona los responsables a quienes derivar este hallazgo.</p>
+
+            {availableUsers.length === 0 ? (
+              <p className="text-sm text-slate-500 py-4 text-center">Todos los usuarios ya están asignados.</p>
+            ) : (
+              <div className="space-y-2 max-h-[250px] overflow-y-auto custom-scrollbar mb-4">
+                {availableUsers.map(user => (
+                  <label key={user.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                    selectedUsers.includes(user.id) ? 'border-bio-primary bg-bio-primary/5' : 'border-slate-100 hover:border-slate-200'
+                  }`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedUsers([...selectedUsers, user.id]);
+                        else setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+                      }}
+                      className="rounded border-slate-300 text-bio-primary focus:ring-bio-primary/20"
+                    />
+                    <div className="w-8 h-8 rounded-full bg-bio-primary/10 flex items-center justify-center text-xs font-bold text-bio-primary">
+                      {user.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-700">{user.name}</p>
+                      <p className="text-[10px] text-slate-400">{SECTORS.find(s => s.value === user.sector)?.label || user.sector}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button className="btn-ghost flex-1" onClick={() => setShowDeriveModal(false)}>
+                Cancelar
+              </button>
+              <button
+                className="btn-primary flex-1"
+                disabled={selectedUsers.length === 0}
+                onClick={handleDerive}
+              >
+                <Send className="w-4 h-4" /> Derivar ({selectedUsers.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Discard Confirmation ── */}
+      {showDiscardConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowDiscardConfirm(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-in zoom-in-95 fade-in duration-200 text-center" onClick={e => e.stopPropagation()}>
+            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-red-100 flex items-center justify-center">
+              <XCircle className="w-7 h-7 text-red-500" />
+            </div>
+            <h3 className="text-lg font-display font-bold text-slate-800 mb-2">¿Descartar Hallazgo?</h3>
+            <p className="text-sm text-slate-500 mb-6">Esta acción moverá el hallazgo <strong>{finding.tracking_id}</strong> al estado descartado. Se puede revertir desde el panel de administración.</p>
+            <div className="flex gap-2">
+              <button className="btn-ghost flex-1" onClick={() => setShowDiscardConfirm(false)}>
+                Cancelar
+              </button>
+              <button className="btn-danger flex-1" onClick={() => onDiscarded(finding.id)}>
+                <XCircle className="w-4 h-4" /> Sí, Descartar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

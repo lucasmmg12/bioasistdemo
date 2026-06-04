@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
 import { BarChart3, PieChart, TrendingUp, Calendar, Download, FileSpreadsheet, Clock } from 'lucide-react';
-import { MOCK_FINDINGS } from '../../data/mockData';
 import { KpiCard } from '../ui/KpiCard';
 import { SECTORS, FINDING_STATUSES } from '../../constants';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { useFindings } from '../../contexts/FindingsContext';
+import { exportToPDF, exportToExcel } from '../../services/exportService';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 export function QualityMetrics() {
-  const findings = MOCK_FINDINGS;
+  const { findings } = useFindings();
 
   // ─── KPIs ───
   const kpis = useMemo(() => {
@@ -135,10 +136,10 @@ export function QualityMetrics() {
           <p className="text-slate-400 text-sm font-medium mt-1">Indicadores de gestión de calidad ISO 9001</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-secondary" onClick={() => alert('📄 Exportación a PDF disponible próximamente')}>
+          <button className="btn-secondary" onClick={() => exportToPDF(findings, `Metricas_BioAsist_${new Date().toISOString().slice(0, 10)}.pdf`)}>
             <Download className="w-4 h-4" /> PDF
           </button>
-          <button className="btn-secondary" onClick={() => alert('📊 Exportación a Excel disponible próximamente')}>
+          <button className="btn-secondary" onClick={() => exportToExcel(findings, `Metricas_BioAsist_${new Date().toISOString().slice(0, 10)}.xlsx`)}>
             <FileSpreadsheet className="w-4 h-4" /> Excel
           </button>
         </div>

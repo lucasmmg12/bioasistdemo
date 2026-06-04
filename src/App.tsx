@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import { MockAuthProvider } from './contexts/MockAuthContext';
+import { FindingsProvider } from './contexts/FindingsContext';
 import { Sidebar } from './components/ui/Sidebar';
 import { TopBar } from './components/ui/TopBar';
 import { QualityDashboard } from './components/calidad/QualityDashboard';
@@ -94,7 +95,9 @@ function App() {
   return (
     <Router>
       <MockAuthProvider>
-        <AppLayout />
+        <FindingsProvider>
+          <AppLayout />
+        </FindingsProvider>
       </MockAuthProvider>
     </Router>
   );
