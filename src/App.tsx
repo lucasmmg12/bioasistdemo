@@ -9,6 +9,7 @@ import { QualityMetrics } from './components/calidad/QualityMetrics';
 import { OrdersPortal } from './components/logistica/OrdersPortal';
 import { FleetDashboard } from './components/flota/FleetDashboard';
 import { BillingPreview } from './components/facturacion/BillingPreview';
+import { AssistantBot } from './components/ui/AssistantBot';
 
 function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -82,6 +83,9 @@ function AppLayout() {
           </div>
         </footer>
       </div>
+
+      {/* Assistant Bot */}
+      <AssistantBot />
     </div>
   );
 }
