@@ -66,19 +66,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         background: 'linear-gradient(180deg, #0B6B4F 0%, #0A5E46 30%, #08503C 70%, #064433 100%)',
       }}
     >
-      {/* ── Decorative pattern overlay ── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.04]">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="medical-cross" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-              <rect x="16" y="8" width="8" height="24" rx="2" fill="white" />
-              <rect x="8" y="16" width="24" height="8" rx="2" fill="white" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#medical-cross)" />
-        </svg>
-      </div>
-
       {/* ── Gradient glow at top ── */}
       <div
         className="absolute top-0 left-0 right-0 h-40 pointer-events-none"
