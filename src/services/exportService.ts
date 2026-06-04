@@ -330,3 +330,295 @@ export function exportToPDF(findings: Finding[], filename?: string) {
   const name = filename || `Hallazgos_BioAsist_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(name);
 }
+
+// ═══════════════════════════════════════════════
+// SINGLE FINDING PDF EXPORT
+// ═══════════════════════════════════════════════
+
+export function exportFindingToPDF(finding: Finding) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
+  let y = 0;
+
+  const GREEN = [11, 107, 79] as [number, number, number];
+  const TEAL = [0, 168, 157] as [number, number, number];
+  const DARK = [30, 41, 59] as [number, number, number];
+  const MUTED = [100, 116, 139] as [number, number, number];
+  const LIGHT_BG = [248, 250, 249] as [number, number, number];
+
+  const priorityColor: Record<string, [number, number, number]> = {
+    red: [220, 38, 38],
+    yellow: [217, 119, 6],
+    green: [22, 163, 74],
+  };
+
+  // ── Helper: add footer on every page ──
+  const addFooter = () => {
+    doc.setFillColor(...LIGHT_BG);
+    doc.rect(0, ph - 12, pw, 12, 'F');
+    doc.setFontSize(7);
+    doc.setTextColor(148, 163, 184);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Bio Asist — Ecosistema Digital de Gestión | Desarrollado por Grow Labs', 15, ph - 5);
+    doc.text(`Página ${doc.getCurrentPageInfo().pageNumber}`, pw - 15, ph - 5, { align: 'right' });
+  };
+
+  // ── Helper: section title ──
+  const sectionTitle = (title: string, yPos: number): number => {
+    if (yPos > ph - 40) {
+      doc.addPage();
+      addFooter();
+      yPos = 20;
+    }
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...GREEN);
+    doc.text(title.toUpperCase(), 15, yPos);
+    doc.setDrawColor(226, 232, 240);
+    doc.line(15, yPos + 1.5, pw - 15, yPos + 1.5);
+    return yPos + 7;
+  };
+
+  // ── Helper: key-value pair ──
+  const kvPair = (key: string, value: string, yPos: number, maxWidth = 160): number => {
+    if (yPos > ph - 25) {
+      doc.addPage();
+      addFooter();
+      yPos = 20;
+    }
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...MUTED);
+    doc.text(key, 20, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...DARK);
+    const lines = doc.splitTextToSize(value, maxWidth);
+    doc.text(lines, 65, yPos);
+    return yPos + (lines.length * 4) + 2;
+  };
+
+  // ══════════════════════════════════════
+  // HEADER BAR
+  // ══════════════════════════════════════
+  doc.setFillColor(...GREEN);
+  doc.rect(0, 0, pw, 35, 'F');
+
+  // Accent line
+  doc.setFillColor(...TEAL);
+  doc.rect(0, 35, pw, 1.5, 'F');
+
+  // Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`HALLAZGO ${finding.tracking_id}`, 15, 16);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Ficha Detallada — Sistema de Gestión de Calidad ISO 9001', 15, 24);
+
+  // Date (right)
+  doc.setFontSize(8);
+  doc.text(`Generado: ${new Date().toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}`, pw - 15, 16, { align: 'right' });
+
+  // Priority + Status badges
+  const statusText = STATUS_LABELS[finding.status] || finding.status;
+  const priorityText = `Prioridad: ${PRIORITY_LABELS[finding.priority] || finding.priority}`;
+  doc.text(`${statusText} | ${priorityText}`, pw - 15, 24, { align: 'right' });
+
+  y = 44;
+
+  // ══════════════════════════════════════
+  // DATOS GENERALES
+  // ══════════════════════════════════════
+  y = sectionTitle('Datos Generales', y);
+
+  y = kvPair('Código:', finding.tracking_id, y);
+  y = kvPair('Tipo:', TYPE_LABELS[finding.type] || finding.type, y);
+  y = kvPair('Origen:', ORIGIN_LABELS[finding.origin] || finding.origin, y);
+  y = kvPair('Sede:', finding.sede === 'hospital' ? 'Hospital' : 'Planta', y);
+  y = kvPair('Sector:', getSectorLabel(finding.sector), y);
+  y = kvPair('Prioridad:', PRIORITY_LABELS[finding.priority] || finding.priority, y);
+  y = kvPair('Estado:', statusText, y);
+  y = kvPair('Fecha:', formatDate(finding.created_at), y);
+  y = kvPair('Reportado por:', finding.reporter_name, y);
+
+  // Priority color indicator bar
+  const pc = priorityColor[finding.priority] || GREEN;
+  doc.setFillColor(...pc);
+  doc.rect(15, y - 1, pw - 30, 1, 'F');
+  y += 5;
+
+  // ══════════════════════════════════════
+  // DESCRIPCIÓN
+  // ══════════════════════════════════════
+  y = sectionTitle('Descripción del Hallazgo', y);
+
+  doc.setFillColor(...LIGHT_BG);
+  const descLines = doc.splitTextToSize(finding.description, pw - 40);
+  const descHeight = descLines.length * 4.5 + 6;
+  doc.roundedRect(15, y - 2, pw - 30, descHeight, 2, 2, 'F');
+
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...DARK);
+  doc.text(descLines, 20, y + 3);
+  y += descHeight + 5;
+
+  // ══════════════════════════════════════
+  // RESPONSABLES ASIGNADOS
+  // ══════════════════════════════════════
+  if (finding.assigned_to.length > 0) {
+    y = sectionTitle('Responsables Asignados', y);
+
+    const assigneeRows = finding.assigned_to.map(a => [
+      a.name,
+      getSectorLabel(a.sector),
+      a.responded ? 'Sí' : 'No',
+      a.response_date ? formatDate(a.response_date) : '—',
+    ]);
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Nombre', 'Sector', 'Respondió', 'Fecha Respuesta']],
+      body: assigneeRows,
+      theme: 'grid',
+      margin: { left: 15, right: 15 },
+      styles: { fontSize: 8, cellPadding: 2.5, lineColor: [226, 232, 240], lineWidth: 0.2, textColor: DARK, font: 'helvetica' },
+      headStyles: { fillColor: GREEN, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+      alternateRowStyles: { fillColor: LIGHT_BG },
+      didParseCell: (data) => {
+        if (data.column.index === 2 && data.section === 'body') {
+          const val = data.cell.raw as string;
+          data.cell.styles.textColor = val === 'Sí' ? [22, 163, 74] : [217, 119, 6];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  // ══════════════════════════════════════
+  // ETAPAS DEL CICLO
+  // ══════════════════════════════════════
+  const stages: { title: string; content?: string; by?: string; date?: string; extra?: string }[] = [];
+
+  if (finding.immediate_action) {
+    stages.push({ title: '⚡ Acción Inmediata', content: finding.immediate_action, by: finding.immediate_action_by, date: finding.immediate_action_date });
+  }
+  if (finding.root_cause) {
+    const method = finding.root_cause_method === '5_porques' ? '5 Porqués' : finding.root_cause_method === 'ishikawa' ? 'Ishikawa' : finding.root_cause_method;
+    stages.push({ title: '🔬 Análisis de Causa Raíz', content: finding.root_cause, by: finding.root_cause_by, date: finding.root_cause_date, extra: method ? `Método: ${method}` : undefined });
+  }
+  if (finding.corrective_plan) {
+    stages.push({ title: '📝 Plan Correctivo', content: finding.corrective_plan, by: finding.corrective_plan_by, date: finding.corrective_plan_date });
+  }
+  if (finding.verification_result) {
+    stages.push({ title: '✅ Verificación', content: finding.verification_result, by: finding.verification_by, date: finding.verification_date });
+  }
+  if (finding.effectiveness_result) {
+    stages.push({ title: '🎯 Efectividad', content: finding.effectiveness_result, by: finding.effectiveness_by, date: finding.effectiveness_date });
+  }
+
+  if (stages.length > 0) {
+    y = sectionTitle('Etapas del Ciclo', y);
+
+    for (const stage of stages) {
+      if (y > ph - 40) {
+        doc.addPage();
+        addFooter();
+        y = 20;
+      }
+
+      // Stage title
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...GREEN);
+      doc.text(stage.title, 20, y);
+      y += 5;
+
+      // Content
+      if (stage.content) {
+        const stageLines = doc.splitTextToSize(stage.content, pw - 50);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...DARK);
+        doc.text(stageLines, 25, y);
+        y += stageLines.length * 4 + 1;
+      }
+
+      // Extra (method)
+      if (stage.extra) {
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(...MUTED);
+        doc.text(stage.extra, 25, y);
+        y += 4;
+      }
+
+      // By + date
+      const meta: string[] = [];
+      if (stage.by) meta.push(`Por: ${stage.by}`);
+      if (stage.date) meta.push(formatDate(stage.date));
+      if (meta.length > 0) {
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(148, 163, 184);
+        doc.text(meta.join('  •  '), 25, y);
+        y += 4;
+      }
+
+      y += 3;
+    }
+  }
+
+  // ══════════════════════════════════════
+  // PLAZOS
+  // ══════════════════════════════════════
+  y = sectionTitle('Plazos', y);
+
+  const deadlines: [string, string][] = [
+    ['Acción Inmediata (48hs)', formatDate(finding.deadline_immediate)],
+    ['Análisis de Causa (15 días)', formatDate(finding.deadline_analysis)],
+  ];
+  if (finding.deadline_verification) deadlines.push(['Verificación', formatDate(finding.deadline_verification)]);
+  if (finding.deadline_effectiveness) deadlines.push(['Efectividad', formatDate(finding.deadline_effectiveness)]);
+
+  autoTable(doc, {
+    startY: y,
+    head: [['Etapa', 'Fecha Límite']],
+    body: deadlines,
+    theme: 'grid',
+    margin: { left: 15, right: 15 },
+    styles: { fontSize: 8, cellPadding: 2.5, lineColor: [226, 232, 240], lineWidth: 0.2, textColor: DARK, font: 'helvetica' },
+    headStyles: { fillColor: GREEN, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 8 },
+    alternateRowStyles: { fillColor: LIGHT_BG },
+    columnStyles: { 0: { fontStyle: 'bold' } },
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  // ══════════════════════════════════════
+  // PROPAGACIÓN Y RIESGOS
+  // ══════════════════════════════════════
+  if (finding.is_propagable || finding.risk_matrix_impact) {
+    y = sectionTitle('Propagación y Riesgos', y);
+
+    if (finding.is_propagable) {
+      y = kvPair('Propagable:', 'Sí', y);
+      y = kvPair('Sectores:', finding.propagated_sectors.map(getSectorLabel).join(', '), y);
+    }
+    if (finding.risk_matrix_impact) {
+      y = kvPair('Impacto Riesgos:', 'Sí — Debe evaluarse en la próxima revisión de la matriz', y);
+    }
+    y += 3;
+  }
+
+  // ── Footer on first page ──
+  addFooter();
+
+  // ── Save ──
+  doc.save(`Hallazgo_${finding.tracking_id}_${new Date().toISOString().slice(0, 10)}.pdf`);
+}

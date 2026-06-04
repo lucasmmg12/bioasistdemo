@@ -13,7 +13,7 @@ import { ProgressBar, UserProgressBar } from '../ui/ProgressBar';
 import { TimelineActivity } from '../ui/TimelineActivity';
 import { Modal } from '../ui/Modal';
 import type { Finding, FindingStatus } from '../../types';
-import { exportToPDF, exportToExcel } from '../../services/exportService';
+import { exportToPDF, exportToExcel, exportFindingToPDF } from '../../services/exportService';
 
 type TabFilter = 'all' | FindingStatus;
 
@@ -457,6 +457,13 @@ function FindingDetail({ finding }: { finding: Finding }) {
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+        <button
+          onClick={() => exportFindingToPDF(finding)}
+          className="btn-secondary gap-1.5"
+        >
+          <Download className="w-4 h-4" />
+          Descargar PDF
+        </button>
         {finding.status === 'pending' && (
           <button className="btn-primary">
             <Users className="w-4 h-4" /> Derivar Hallazgo
@@ -467,6 +474,7 @@ function FindingDetail({ finding }: { finding: Finding }) {
             <Eye className="w-4 h-4" /> Validar Etapa
           </button>
         )}
+        <div className="flex-1" />
         {finding.status !== 'closed' && finding.status !== 'discarded' && (
           <button className="btn-ghost text-red-500 hover:text-red-600 hover:bg-red-50">
             <XCircle className="w-4 h-4" /> Descartar
