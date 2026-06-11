@@ -7,16 +7,23 @@ import { TopBar } from './components/ui/TopBar';
 import { QualityDashboard } from './components/calidad/QualityDashboard';
 import { FindingForm } from './components/calidad/FindingForm';
 import { QualityMetrics } from './components/calidad/QualityMetrics';
+import { MyCases } from './components/calidad/MyCases';
 import { OrdersPortal } from './components/logistica/OrdersPortal';
 import { FleetDashboard } from './components/flota/FleetDashboard';
 import { BillingPreview } from './components/facturacion/BillingPreview';
 import { AssistantBot } from './components/ui/AssistantBot';
+import { PublicReportForm } from './pages/PublicReportForm';
+import { PublicTrackingPage } from './pages/PublicTrackingPage';
+import { ResolutionPage } from './pages/ResolutionPage';
+import { ProceduresManual } from './pages/ProceduresManual';
+import { TutorialProvider } from './components/ui/TutorialSystem';
 
-function AppLayout() {
+function DashboardLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
+    <TutorialProvider>
     <div className="min-h-screen bg-bio-neutral">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
@@ -27,12 +34,10 @@ function AppLayout() {
       )}
 
       {/* Sidebar — desktop always visible, mobile as overlay */}
-      <div className={`hidden md:block`}>
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        />
-      </div>
+      <Sidebar
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
       {mobileMenuOpen && (
         <div className="md:hidden fixed z-40">
           <Sidebar collapsed={false} onToggle={() => setMobileMenuOpen(false)} />
@@ -41,9 +46,10 @@ function AppLayout() {
 
       {/* Main content */}
       <div
-        className={`transition-all duration-300 ${
-          sidebarCollapsed ? 'md:ml-[72px]' : 'md:ml-[240px]'
-        }`}
+        className="transition-all duration-300"
+        style={{
+          marginLeft: sidebarCollapsed ? '72px' : '260px',
+        }}
       >
         <TopBar onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
@@ -55,6 +61,7 @@ function AppLayout() {
             {/* Calidad */}
             <Route path="/calidad" element={<QualityDashboard />} />
             <Route path="/calidad/nuevo" element={<FindingForm />} />
+            <Route path="/calidad/mis-casos" element={<MyCases />} />
 
             {/* Logística */}
             <Route path="/logistica" element={<OrdersPortal />} />
@@ -67,6 +74,9 @@ function AppLayout() {
 
             {/* Métricas */}
             <Route path="/metricas" element={<QualityMetrics />} />
+
+            {/* Manual de Procedimientos */}
+            <Route path="/manual" element={<ProceduresManual />} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/calidad" replace />} />
@@ -88,6 +98,7 @@ function AppLayout() {
       {/* Assistant Bot */}
       <AssistantBot />
     </div>
+    </TutorialProvider>
   );
 }
 
@@ -96,7 +107,15 @@ function App() {
     <Router>
       <MockAuthProvider>
         <FindingsProvider>
-          <AppLayout />
+          <Routes>
+            {/* Public pages — full screen, no sidebar */}
+            <Route path="/reportar" element={<PublicReportForm />} />
+            <Route path="/seguimiento" element={<PublicTrackingPage />} />
+            <Route path="/resolver/:trackingId" element={<ResolutionPage />} />
+
+            {/* Dashboard — with sidebar layout */}
+            <Route path="/*" element={<DashboardLayout />} />
+          </Routes>
         </FindingsProvider>
       </MockAuthProvider>
     </Router>

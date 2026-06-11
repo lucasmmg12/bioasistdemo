@@ -13,7 +13,7 @@ import { ProgressBar, UserProgressBar } from '../ui/ProgressBar';
 import { TimelineActivity } from '../ui/TimelineActivity';
 import { Modal } from '../ui/Modal';
 import type { Finding, FindingStatus, Assignee } from '../../types';
-import { exportToPDF, exportToExcel, exportFindingToPDF } from '../../services/exportService';
+import { exportToPDF, exportToExcel, exportFindingToPDF, exportSeguimiento } from '../../services/exportService';
 import { useFindings } from '../../contexts/FindingsContext';
 import { MOCK_USERS } from '../../data/mockData';
 
@@ -21,11 +21,14 @@ type TabFilter = 'all' | FindingStatus;
 
 export function QualityDashboard() {
   const navigate = useNavigate();
-  const { findings, assignTo, updateStatus, discardFinding } = useFindings();
+  const { findings, assignTo, updateStatus, discardFinding, returnFinding } = useFindings();
   const [activeTab, setActiveTab] = useState<TabFilter>('all');
   const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [sectorFilter, setSectorFilter] = useState('all');
+  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [whatsappToast, setWhatsappToast] = useState<{ name: string; link: string } | null>(null);
 
   // ─── KPIs ───
   const kpis = useMemo(() => {
@@ -49,6 +52,12 @@ export function QualityDashboard() {
     if (activeTab !== 'all') {
       result = result.filter(f => f.status === activeTab);
     }
+    if (sectorFilter !== 'all') {
+      result = result.filter(f => f.sector === sectorFilter);
+    }
+    if (priorityFilter !== 'all') {
+      result = result.filter(f => f.priority === priorityFilter);
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(f =>
@@ -59,7 +68,7 @@ export function QualityDashboard() {
       );
     }
     return result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  }, [findings, activeTab, searchQuery]);
+  }, [findings, activeTab, searchQuery, sectorFilter, priorityFilter]);
 
   // ─── Check overdue ───
   const isOverdue = (finding: Finding): boolean => {
@@ -143,6 +152,21 @@ export function QualityDashboard() {
                         <p className="text-[10px] text-slate-400">Datos completos + resumen</p>
                       </div>
                     </button>
+                    <button
+                      onClick={() => {
+                        exportSeguimiento(filteredFindings);
+                        setShowExportMenu(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all cursor-pointer"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-xs">Seguimiento AC/OM</p>
+                        <p className="text-[10px] text-slate-400">R GC 07 — Planilla completa</p>
+                      </div>
+                    </button>
                   </div>
                   <div className="border-t border-slate-100 px-3 py-2">
                     <p className="text-[9px] text-slate-400 font-medium">
@@ -187,6 +211,30 @@ export function QualityDashboard() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+
+          {/* Sector Filter */}
+          <select
+            value={sectorFilter}
+            onChange={(e) => setSectorFilter(e.target.value)}
+            className="input-field text-xs font-bold w-auto min-w-[140px]"
+          >
+            <option value="all">Todos los Sectores</option>
+            {SECTORS.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
+
+          {/* Priority Filter */}
+          <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="input-field text-xs font-bold w-auto min-w-[120px]"
+          >
+            <option value="all">Todas las Prioridades</option>
+            <option value="red">🔴 Alta</option>
+            <option value="yellow">🟡 Media</option>
+            <option value="green">🟢 Baja</option>
+          </select>
 
           {/* Tabs */}
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1">
@@ -303,6 +351,17 @@ export function QualityDashboard() {
               // Refresh the selected finding from context
               const updated = findings.find(f => f.id === id);
               if (updated) setSelectedFinding({ ...updated, assigned_to: assignees, status: updated.status === 'pending' ? 'immediate_action' : updated.status });
+              // Show WhatsApp toast with resolution link
+              const newAssignee = assignees[assignees.length - 1];
+              if (newAssignee) {
+                const trackingId = updated?.tracking_id || '';
+                setWhatsappToast({ name: newAssignee.name, link: `${window.location.origin}/resolver/${trackingId}` });
+                setTimeout(() => setWhatsappToast(null), 8000);
+              }
+            }}
+            onReturned={(id, reason) => {
+              returnFinding(id, reason);
+              setSelectedFinding(null);
             }}
             onValidated={(id) => {
               const statusMap: Record<string, FindingStatus> = {
@@ -325,6 +384,36 @@ export function QualityDashboard() {
           />
         )}
       </Modal>
+
+      {/* WhatsApp Toast */}
+      {whatsappToast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="bg-white rounded-2xl shadow-2xl border border-green-200 p-5 max-w-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-6 h-6">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-green-700">📱 WhatsApp enviado</p>
+                <p className="text-xs text-slate-500 mt-0.5">Se envió un link de resolución a <strong>{whatsappToast.name}</strong></p>
+                <button
+                  onClick={async () => {
+                    try { await navigator.clipboard.writeText(whatsappToast.link); } catch {}
+                    alert('Link copiado: ' + whatsappToast.link);
+                  }}
+                  className="mt-2 text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg hover:bg-green-100 transition-colors truncate block max-w-full"
+                >
+                  📋 Copiar link: {whatsappToast.link}
+                </button>
+              </div>
+              <button onClick={() => setWhatsappToast(null)} className="text-slate-400 hover:text-slate-600"><XCircle className="w-4 h-4" /></button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -335,12 +424,15 @@ interface FindingDetailProps {
   onDerived: (id: string, assignees: Assignee[]) => void;
   onValidated: (id: string) => void;
   onDiscarded: (id: string) => void;
+  onReturned: (id: string, reason: string) => void;
 }
 
-function FindingDetail({ finding, onDerived, onValidated, onDiscarded }: FindingDetailProps) {
+function FindingDetail({ finding, onDerived, onValidated, onDiscarded, onReturned }: FindingDetailProps) {
   const getSectorLabel = (value: string) => SECTORS.find(s => s.value === value)?.label || value;
   const [showDeriveModal, setShowDeriveModal] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnReason, setReturnReason] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const responded = finding.assigned_to.filter(a => a.responded).length;
@@ -397,6 +489,156 @@ function FindingDetail({ finding, onDerived, onValidated, onDiscarded }: Finding
           <span>{new Date(finding.created_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
         </div>
       </div>
+
+      {/* R GC 05/06/08 — Extended Fields */}
+      {(finding.institution || finding.ot_number || finding.material || finding.claim_number) && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {finding.institution && (
+            <div className="bg-white rounded-xl p-3 border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Institución</p>
+              <p className="text-xs font-bold text-slate-700">{finding.institution}</p>
+            </div>
+          )}
+          {finding.ot_number && (
+            <div className="bg-white rounded-xl p-3 border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Orden de Trabajo</p>
+              <p className="text-xs font-bold text-bio-primary">{finding.ot_number}</p>
+            </div>
+          )}
+          {finding.material && (
+            <div className="bg-white rounded-xl p-3 border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Material</p>
+              <p className="text-xs text-slate-700">{finding.material}</p>
+            </div>
+          )}
+          {finding.remito_number && (
+            <div className="bg-white rounded-xl p-3 border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Remito</p>
+              <p className="text-xs font-bold text-slate-700">{finding.remito_number}</p>
+            </div>
+          )}
+          {finding.system_element && (
+            <div className="bg-white rounded-xl p-3 border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Elemento del Sistema</p>
+              <p className="text-xs text-slate-700">{finding.system_element}</p>
+            </div>
+          )}
+          {finding.requirement_violated && (
+            <div className="bg-white rounded-xl p-3 border border-slate-100 col-span-2 md:col-span-3">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Requisito No Cumplido</p>
+              <p className="text-xs text-red-600 font-medium">{finding.requirement_violated}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* R GC 08 — Claim-specific fields */}
+      {finding.type === 'reclamo_cliente' && (
+        <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+          <p className="text-xs font-bold text-orange-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            📋 Datos del Reclamo — R GC 08
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {finding.claim_number && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">N° Reclamo</p>
+                <p className="text-xs font-bold text-slate-700">{finding.claim_number}</p>
+              </div>
+            )}
+            {finding.client_contact_name && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">Contacto</p>
+                <p className="text-xs text-slate-700">{finding.client_contact_name}</p>
+              </div>
+            )}
+            {finding.product_service && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">Producto/Servicio</p>
+                <p className="text-xs text-slate-700">{finding.product_service}</p>
+              </div>
+            )}
+            {finding.quantity_delivered !== undefined && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">Cant. Entregada</p>
+                <p className="text-xs font-bold text-slate-700">{finding.quantity_delivered}</p>
+              </div>
+            )}
+            {finding.quantity_objected !== undefined && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">Cant. Objetada</p>
+                <p className="text-xs font-bold text-red-600">{finding.quantity_objected}</p>
+              </div>
+            )}
+            {finding.claim_detection_method && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">Detección</p>
+                <p className="text-xs text-slate-700 capitalize">{finding.claim_detection_method}</p>
+              </div>
+            )}
+            <div>
+              <p className="text-[10px] font-bold text-orange-500 uppercase">¿Pertinente?</p>
+              <p className={`text-xs font-bold ${finding.claim_is_pertinent ? 'text-green-600' : 'text-red-600'}`}>
+                {finding.claim_is_pertinent ? 'SÍ' : 'NO'}
+              </p>
+            </div>
+            {finding.claim_value_pesos !== undefined && finding.claim_value_pesos > 0 && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">Valor ($)</p>
+                <p className="text-xs font-bold text-slate-700">$ {finding.claim_value_pesos.toLocaleString('es-AR')}</p>
+              </div>
+            )}
+            {finding.linked_ac_number && (
+              <div>
+                <p className="text-[10px] font-bold text-orange-500 uppercase">AC Vinculada</p>
+                <p className="text-xs font-bold text-bio-primary">{finding.linked_ac_number}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* R GC 06 — OM-specific fields */}
+      {finding.type === 'oportunidad_mejora' && finding.om_benefits && (
+        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+          <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            💡 Datos de la OM — R GC 06
+          </p>
+          <div className="space-y-3">
+            <div>
+              <p className="text-[10px] font-bold text-blue-500 uppercase mb-1">Beneficios</p>
+              <p className="text-xs text-slate-700 leading-relaxed">{finding.om_benefits}</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div>
+                <p className="text-[10px] font-bold text-blue-500 uppercase">Decisión</p>
+                <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full ${
+                  finding.om_decision === 'aceptada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {finding.om_decision === 'aceptada' ? '✅ Aceptada' : '❌ Rechazada'}
+                </span>
+              </div>
+              {finding.om_analyst && (
+                <div>
+                  <p className="text-[10px] font-bold text-blue-500 uppercase">Analista</p>
+                  <p className="text-xs text-slate-700">{finding.om_analyst}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bio Asist sectors involved */}
+      {finding.bio_asist_sectors_involved && finding.bio_asist_sectors_involved.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sectores Bio Asist involucrados</p>
+          <div className="flex flex-wrap gap-1.5">
+            {finding.bio_asist_sectors_involved.map(s => (
+              <span key={s} className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-bio-primary/10 text-bio-primary">{s}</span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Progress */}
       <div>
@@ -528,16 +770,39 @@ function FindingDetail({ finding, onDerived, onValidated, onDiscarded }: Finding
           className="btn-secondary gap-1.5"
         >
           <Download className="w-4 h-4" />
-          Descargar PDF
+          {finding.type === 'reclamo_cliente' ? 'Formulario R GC 08' : finding.type === 'oportunidad_mejora' ? 'Formulario R GC 06' : 'Formulario R GC 05'}
         </button>
         {finding.status === 'pending' && (
           <button className="btn-primary" onClick={() => setShowDeriveModal(true)}>
             <Users className="w-4 h-4" /> Derivar Hallazgo
           </button>
         )}
-        {Object.keys(NEXT_STATUS_LABELS).includes(finding.status) && (
+        {finding.status === 'verification' && (
+          <>
+            <button className="btn-accent" onClick={() => onValidated(finding.id)}>
+              <CheckCircle2 className="w-4 h-4" /> Aprobar Resolución
+            </button>
+            <button className="btn-secondary text-orange-600 hover:bg-orange-50 border-orange-200" onClick={() => setShowReturnModal(true)}>
+              ↩️ Devolver con Observación
+            </button>
+          </>
+        )}
+        {Object.keys(NEXT_STATUS_LABELS).includes(finding.status) && finding.status !== 'verification' && (
           <button className="btn-accent" onClick={() => onValidated(finding.id)}>
             <Eye className="w-4 h-4" /> Validar → {NEXT_STATUS_LABELS[finding.status]}
+          </button>
+        )}
+        {/* Link to resolution page */}
+        {finding.assigned_to.length > 0 && !['closed', 'discarded', 'pending'].includes(finding.status) && (
+          <button
+            onClick={async () => {
+              const link = `${window.location.origin}/resolver/${finding.tracking_id}`;
+              try { await navigator.clipboard.writeText(link); } catch {}
+              alert('Link copiado: ' + link);
+            }}
+            className="btn-ghost text-green-600 hover:bg-green-50"
+          >
+            📱 Copiar Link Resolución
           </button>
         )}
         <div className="flex-1" />
@@ -617,6 +882,44 @@ function FindingDetail({ finding, onDerived, onValidated, onDiscarded }: Finding
               </button>
               <button className="btn-danger flex-1" onClick={() => onDiscarded(finding.id)}>
                 <XCircle className="w-4 h-4" /> Sí, Descartar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Return Modal ── */}
+      {showReturnModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowReturnModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 fade-in duration-200" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-display font-bold text-slate-800">Devolver con Observación</h3>
+                <p className="text-xs text-slate-400">La resolución será devuelta al responsable</p>
+              </div>
+            </div>
+            <textarea
+              value={returnReason}
+              onChange={e => setReturnReason(e.target.value)}
+              placeholder="Motivo de la devolución... Ej: Falta evidencia fotográfica de la acción tomada."
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-orange-400 outline-none text-sm resize-none mb-4"
+              rows={3}
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button className="btn-ghost flex-1" onClick={() => setShowReturnModal(false)}>Cancelar</button>
+              <button
+                className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                disabled={!returnReason.trim()}
+                onClick={() => {
+                  onReturned(finding.id, returnReason.trim());
+                  setShowReturnModal(false);
+                }}
+              >
+                <Send className="w-4 h-4" /> Devolver
               </button>
             </div>
           </div>

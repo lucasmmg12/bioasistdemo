@@ -3,17 +3,18 @@ const fs = require('fs');
 const path = require('path');
 
 // =====================================================
-// PRODUCT DATA (extracted from the original PDF)
+// PRODUCT DATA - JUNIO 2026 (extracted from LISTA DE PRECIOS JUNIO.pdf)
+// Columna DISTRIBUIDOR eliminada por solicitud
 // =====================================================
 
 const vyperProducts = [
-  { name: 'WHEY BLEND PROTEIN BLACK XTREME DOYPACK 2lb - (Chocolate-Vainilla-Frutilla)', ml3c: '$65.000,00', mlf: '$60.000,00', ec3c: '$60.000,00', ecf: '$56.000,00', may: '$46.690,00' },
+  { name: 'WHEY BLEND PROTEIN BLACK XTREME DOYPACK 2lb - (Chocolate-Vainilla-Frutilla)', ml3c: '$71.500,00', mlf: '$66.000,00', ec3c: '$66.000,00', ecf: '$61.600,00', may: '$51.359,00' },
   { name: 'FIX BCAA 300g - (Frutos rojos-Limon-Uva-mango)', ml3c: '$32.890,00', mlf: '$28.600,00', ec3c: '$23.140,00', ecf: '$19.700,00', may: '$16.860,00' },
   { name: 'NITROXPLOD 450g - (Arandanos-Limon-Uva)', ml3c: '$40.360,00', mlf: '$35.100,00', ec3c: '$28.410,00', ecf: '$24.100,00', may: '$20.800,00' },
   { name: 'NITRORIPPED - Pre Entreno + Quemador 300g - (Arandanos-Limon-Uva)', ml3c: '$34.040,00', mlf: '$29.600,00', ec3c: '$24.000,00', ecf: '$20.400,00', may: '$17.480,00' },
   { name: 'CREASTACK - Creatina + HMB + Ácido Alfalipoico 300g - FRUTOS ROJOS', ml3c: '$28.900,00', mlf: '$25.200,00', ec3c: '$25.200,00', ecf: '$21.900,00', may: '$16.790,00' },
   { name: 'TESTOFULL ULTRA 300g - (Multifruta-Uva-Naranja-Pomelo)', ml3c: '$22.320,00', mlf: '$19.400,00', ec3c: '$20.360,00', ecf: '$17.300,00', may: '$14.840,00' },
-  { name: 'ALL AMINO 9 - Aminos Esenciales 350g (Uva-Lima-Frutos Rojos)', ml3c: '$39.780,00', mlf: '$34.600,00', ec3c: '$28.100,00', ecf: '$23.900,00', may: '$20.480,00' },
+  { name: 'ALL AMINO 9 - Aminos Esenciales 350g - (Uva-Lima-Frutos Rojos)', ml3c: '$39.780,00', mlf: '$34.600,00', ec3c: '$28.100,00', ecf: '$23.900,00', may: '$20.480,00' },
   { name: 'ZMA - Zinc, Magnesio, Vitamina B6 - CAPSULAS', ml3c: '$20.480,00', mlf: '$17.800,00', ec3c: '$14.520,00', ecf: '$12.300,00', may: '$10.580,00' },
   { name: 'HMB (β-Hidroxi β-Metilbutarato) - CAPSULAS', ml3c: '$28.980,00', mlf: '$25.200,00', ec3c: '$20.400,00', ecf: '$17.300,00', may: '$14.860,00' },
   { name: 'CAFFEINE PURE - Quemador - CAPSULAS', ml3c: '$17.940,00', mlf: '$15.600,00', ec3c: '$12.600,00', ecf: '$10.700,00', may: '$9.200,00' },
@@ -33,7 +34,7 @@ const vyperProducts = [
 ];
 
 const oneFitProducts = [
-  { name: 'CLASSIC WHEY PROTEIN DOYPACK 2lb - (Chocolate-Frutilla-Vainilla)', ml3c: '$46.500,00', mlf: '$40.400,00', ec3c: '$40.400,00', ecf: '$36.000,00', may: '$27.480,00' },
+  { name: 'CLASSIC WHEY PROTEIN DOYPACK 2lbs. - (Chocolate-Frutilla-Vainilla)', ml3c: '$51.150,00', mlf: '$44.440,00', ec3c: '$44.440,00', ecf: '$39.600,00', may: '$30.228,00' },
   { name: 'PUSH BCAA 300g - (Cereza-Limon)', ml3c: '$28.865,00', mlf: '$25.100,00', ec3c: '$19.570,00', ecf: '$16.600,00', may: '$14.260,00' },
   { name: 'CREATINE MICRONIZED 200g', ml3c: '$18.285,00', mlf: '$15.900,00', ec3c: '$15.900,00', ecf: '$13.500,00', may: '$9.200,00' },
   { name: 'CREATINE MICRONIZED 500g', ml3c: '$35.420,00', mlf: '$30.800,00', ec3c: '$30.800,00', ecf: '$26.200,00', may: '$21.850,00' },
@@ -108,7 +109,7 @@ function generateHTML(logoBase64) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lista de Precios - Vyper Suplementos</title>
+  <title>Lista de Precios - Vyper Suplementos - Junio 2026</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -371,14 +372,14 @@ function generateHTML(logoBase64) {
   <!-- COVER SECTION -->
   <div class="cover">
     <div class="cover-title">LISTA DE PRECIOS</div>
-    <div class="cover-subtitle">MAYO 2026</div>
+    <div class="cover-subtitle">JUNIO 2026</div>
     <img src="data:image/jpeg;base64,${logoBase64}" class="cover-logo" alt="Vyper Suplementos">
     <div class="cover-brand">VYPER SUPLEMENTOS</div>
     <div class="cover-tagline">SUPLEMENTACIÓN DEPORTIVA</div>
-    <div class="cover-date">PRECIOS VIGENTES — MAYO 2026</div>
+    <div class="cover-date">PRECIOS VIGENTES — JUNIO 2026</div>
   </div>
 
-  <!-- TABLE 1: XBODY Products → Vyper Suplementos Línea Black -->
+  <!-- TABLE 1: Vyper Suplementos Línea Black -->
   ${generateTable('LISTA DE PRECIOS VYPER SUPLEMENTOS — LÍNEA BLACK', vyperProducts).replace(/LOGO_PLACEHOLDER/g, logoBase64)}
 
   <div class="footer">VYPER SUPLEMENTOS — Todos los precios incluyen IVA — Precios sujetos a cambios sin previo aviso</div>
@@ -386,7 +387,7 @@ function generateHTML(logoBase64) {
   <!-- PAGE BREAK BEFORE SECOND TABLE -->
   <div style="page-break-before: always;"></div>
 
-  <!-- TABLE 2: ONE FIT Products → Vyper Suplementos Línea One Fit -->
+  <!-- TABLE 2: Vyper Suplementos Línea One Fit -->
   ${generateTable('LISTA DE PRECIOS VYPER SUPLEMENTOS — LÍNEA ONE FIT', oneFitProducts).replace(/LOGO_PLACEHOLDER/g, logoBase64)}
 
   <div class="footer">VYPER SUPLEMENTOS — Todos los precios incluyen IVA — Precios sujetos a cambios sin previo aviso</div>
@@ -402,7 +403,7 @@ function generateHTML(logoBase64) {
 // =====================================================
 
 async function main() {
-  console.log('🔧 Generando PDF de Vyper Suplementos...');
+  console.log('🔧 Generando PDF de Vyper Suplementos - JUNIO 2026...');
   console.log('');
 
   // Read the Vyper logo
@@ -443,7 +444,7 @@ async function main() {
     // Try to find via powershell
     const { execSync } = require('child_process');
     try {
-      const result = execSync('powershell -Command "(Get-ItemProperty \'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe\').\\"(default)\\"" 2>$null', { encoding: 'utf-8' }).trim();
+      const result = execSync('powershell -Command "(Get-ItemProperty \'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe\').\\\"(default)\\\"" 2>$null', { encoding: 'utf-8' }).trim();
       if (result && fs.existsSync(result)) {
         browserPath = result;
       }
@@ -494,7 +495,7 @@ async function main() {
     await new Promise(r => setTimeout(r, 2000));
 
     // Generate PDF
-    const outputPath = path.join(__dirname, 'LISTA VYPER SUPLEMENTOS. ONE FIT MAYO.pdf');
+    const outputPath = path.join(__dirname, 'LISTA VYPER SUPLEMENTOS. ONE FIT JUNIO.pdf');
     
     await page.pdf({
       path: outputPath,

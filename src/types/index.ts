@@ -14,23 +14,50 @@ export interface Finding {
   reporter_sector: string;
   assigned_to: Assignee[];
 
+  // ── R GC 05 — Datos de Acción Correctiva ──
+  ot_number?: string;                    // Orden de Trabajo
+  institution?: string;                  // Institución/Hospital
+  material?: string;                     // Material afectado
+  remito_number?: string;                // N° de remito
+  quantity_affected?: number;            // Cantidad afectada
+  category?: string;                     // Categoría
+  system_element?: string;               // Elemento del sistema de calidad
+  bio_asist_sectors_involved?: string[]; // Sectores internos involucrados
+  involved_operators?: string;           // Operarios involucrados
+  sector_responsible?: string;           // Responsable del sector
+  requirement_violated?: string;         // Requisito no cumplido
+
   // Etapas del ciclo ISO 9001
   immediate_action?: string;
   immediate_action_date?: string;
   immediate_action_by?: string;
+  immediate_action_done_by?: string;     // Quién ejecutó la ACI
+  immediate_action_done_date?: string;   // Cuándo se ejecutó
+  requires_immediate_action?: boolean;   // ¿Corresponde ACI?
+  immediate_action_closed?: boolean;     // Cierre ACI SI/NO
+
   root_cause?: string;
   root_cause_method?: RootCauseMethod;
   root_cause_date?: string;
   root_cause_by?: string;
+
   corrective_plan?: string;
   corrective_plan_date?: string;
   corrective_plan_by?: string;
+  corrective_done_by?: string;           // Quién implementó la ACF
+  corrective_done_date?: string;         // Cuándo se implementó
+  corrective_evaluation?: CorrectiveEvaluation; // Evaluación del emisor
+
   verification_result?: string;
   verification_date?: string;
   verification_by?: string;
+  verification_implemented?: boolean;    // IMPLEMENTADA / NO IMPLEMENTADA
+
   effectiveness_result?: string;
   effectiveness_date?: string;
   effectiveness_by?: string;
+  effectiveness_effective?: boolean;     // ¿Es efectiva la ACF?
+  new_nc_generated?: string;             // N° de nueva AC si se generó
 
   // Plazos
   deadline_immediate: string;     // +48h desde creación
@@ -46,6 +73,28 @@ export interface Finding {
   // Evidencia
   evidence_urls: string[];
   resolution_evidence_urls: string[];
+
+  // ── R GC 06 — Oportunidad de Mejora ──
+  om_benefits?: string;                  // Beneficios que aporta la OM
+  om_decision?: OmDecision;             // Aceptada / Rechazada
+  om_rejection_reason?: string;          // Motivo de rechazo
+  om_analyst?: string;                   // Responsable del análisis
+  om_analysis_date?: string;             // Fecha de análisis
+
+  // ── R GC 08 — Reclamo de Cliente ──
+  claim_number?: string;                 // N° Reclamo
+  client_sector?: string;                // Sector del cliente
+  client_contact_name?: string;          // Nombre de contacto
+  product_service?: string;              // Producto/Servicio entregado
+  quantity_delivered?: number;            // Cantidad entregada
+  quantity_objected?: number;            // Cantidad objetada
+  claim_detection_method?: ClaimDetectionMethod;
+  claim_is_pertinent?: boolean;          // ¿El reclamo es pertinente?
+  claim_non_pertinent_reason?: string;   // Motivo de no pertinencia
+  claim_commitment_date?: string;        // Fecha compromiso con cliente
+  linked_ac_number?: string;             // N° de AC vinculada
+  claim_communication_date?: string;     // Fecha comunicación con cliente
+  claim_value_pesos?: number;            // Valor en pesos
 
   // Auditoría
   created_at: string;
@@ -78,13 +127,15 @@ export type FindingOrigin =
   | 'proceso'
   | '5s'
   | 'queja_cliente'
-  | 'deteccion_espontanea';
+  | 'deteccion_espontanea'
+  | 'reclamo_formal';
 
 export type FindingType =
   | 'oportunidad_mejora'
   | 'no_conformidad'
   | 'evento_adverso'
-  | 'cuasi_evento';
+  | 'cuasi_evento'
+  | 'reclamo_cliente';
 
 export type Sede = 'hospital' | 'planta';
 
@@ -95,6 +146,27 @@ export type RootCauseMethod =
   | 'ishikawa'
   | 'pareto'
   | 'otro';
+
+export type CorrectiveEvaluation = 'satisfactoria' | 'requiere_info';
+
+export type OmDecision = 'aceptada' | 'rechazada';
+
+export type ClaimDetectionMethod =
+  | 'redes'
+  | 'presencial'
+  | 'mail'
+  | 'telefono'
+  | 'whatsapp';
+
+// ── Bio Asist Internal Sectors (for checkbox selection) ──
+export const BIO_ASIST_SECTORS = [
+  'Lavado de instrumental',
+  'Esterilización',
+  'Verificación',
+  'Acondicionamiento',
+  'Logística',
+  'Lavandería',
+] as const;
 
 // ─── Logística ───
 

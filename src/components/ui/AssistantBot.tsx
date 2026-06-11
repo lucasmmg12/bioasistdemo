@@ -42,7 +42,7 @@ const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     followUp: ['¿Qué tipos de hallazgo existen?', '¿Cómo se asigna prioridad?'],
   },
   {
-    keywords: ['calidad', 'gestion calidad', 'iso', 'no conformidad', 'hallazgos'],
+    keywords: ['calidad', 'gestion calidad', 'iso', 'hallazgos'],
     answer: 'El módulo de **Calidad** gestiona el ciclo completo ISO 9001 de hallazgos. Incluye: registro de no conformidades, oportunidades de mejora, cuasi eventos y eventos adversos. Cada hallazgo pasa por etapas: **Pendiente → Acción Inmediata → Análisis de Causa → Plan Correctivo → Verificación → Efectividad → Cerrado**.',
     relatedModule: '/calidad',
     followUp: ['¿Cómo funciona el ciclo de calidad?', '¿Qué es una no conformidad?'],
@@ -63,23 +63,23 @@ const KNOWLEDGE_BASE: KnowledgeEntry[] = [
   },
   {
     keywords: ['logistica', 'pedido', 'pedidos', 'retiro', 'entrega', 'envio', 'material'],
-    answer: 'El módulo de **Logística** gestiona los pedidos de material hospitalario. Cada pedido pasa por: **Solicitado → En Ruta → Retirado → En Planta → Procesado → Listo Entrega → Entregado**. Podés filtrar por estado y prioridad (normal/urgente).',
+    answer: 'El módulo de **Logística** gestiona los pedidos de material hospitalario. Cada pedido pasa por: **Solicitado → En Ruta → Retirado → En Planta → Procesado → Listo Entrega → Entregado**. Podés filtrar por estado y prioridad (normal/urgente). Los pedidos urgentes se destacan con alerta visual.',
     relatedModule: '/logistica',
     followUp: ['¿Cómo se crea un pedido?', '¿Qué significa cada estado?'],
   },
   {
     keywords: ['flota', 'vehiculo', 'vehiculos', 'auto', 'combustible', 'km', 'mantenimiento', 'service'],
-    answer: 'El módulo de **Flota** controla los vehículos de la empresa. Registra:\n\n🚗 **Datos del vehículo**: patente, modelo, año, conductor asignado\n⛽ **Consumo**: registro de cargas de combustible y consumo km/litro\n🔧 **Mantenimiento**: kilometraje del último y próximo service\n📊 **Estado**: Activo, En Taller o Inactivo',
+    answer: 'El módulo de **Flota** controla los vehículos de la empresa. Registra:\n\n🚗 **Datos del vehículo**: patente, modelo, año, conductor asignado\n⛽ **Consumo**: registro de cargas de combustible y consumo km/litro\n🔧 **Mantenimiento**: kilometraje del último y próximo service\n📊 **Estado**: Activo, En Taller o Inactivo\n\nAdemás muestra alertas cuando un vehículo está próximo al service.',
     relatedModule: '/flota',
   },
   {
     keywords: ['facturacion', 'factura', 'cobro', 'precio', 'cliente', 'pendiente facturar'],
-    answer: 'El módulo de **Facturación** muestra los servicios prestados y su estado de cobro:\n\n📋 **Pendiente**: Servicio realizado, sin facturar\n📄 **Facturado**: Factura emitida, pendiente de cobro\n💰 **Cobrado**: Pago recibido\n\nIncluye detalle por cliente, cantidad, precio unitario y total.',
+    answer: 'El módulo de **Facturación** muestra los servicios prestados y su estado de cobro:\n\n📋 **Pendiente**: Servicio realizado, sin facturar\n📄 **Facturado**: Factura emitida, pendiente de cobro\n💰 **Cobrado**: Pago recibido\n\nIncluye detalle por cliente con barra de progreso de cobro, cantidad, precio unitario y total.',
     relatedModule: '/facturacion',
   },
   {
     keywords: ['metrica', 'metricas', 'reporte', 'estadistica', 'indicador', 'kpi', 'grafico'],
-    answer: 'El módulo de **Métricas** te muestra indicadores clave (KPIs) del sistema de calidad:\n\n📊 Hallazgos abiertos vs cerrados\n⏱️ Tiempo promedio de resolución\n📈 Tendencia mensual de hallazgos\n🏷️ Distribución por tipo, origen y sector\n🎯 Tasa de efectividad de acciones correctivas',
+    answer: 'El módulo de **Métricas** te muestra indicadores clave (KPIs) del sistema de calidad:\n\n📊 Hallazgos abiertos vs cerrados\n⏱️ Tiempo promedio de resolución\n📈 Tendencia mensual (gráfico de línea)\n🏷️ Distribución por tipo, origen y sector\n🎯 Índice de reincidencia por sector\n🔴 Resumen de impacto en matriz de riesgo',
     relatedModule: '/metricas',
   },
   {
@@ -105,6 +105,78 @@ const KNOWLEDGE_BASE: KnowledgeEntry[] = [
     keywords: ['ayuda', 'help', 'tutorial', 'como usar', 'empezar', 'guia'],
     answer: '¡Tenés varias opciones para aprender a usar Bio Asist!\n\n📖 **Modo Tutorial**: Activalo desde el ícono de 🎓 en mi panel. Te guío paso a paso por cada módulo del sistema.\n\n💬 **Preguntame**: Escribime cualquier duda y te respondo al instante.\n\n🧭 **Navegación**: Usá el sidebar izquierdo para moverte entre módulos.',
     followUp: ['Iniciá el tutorial', '¿Qué módulos hay?'],
+  },
+  {
+    keywords: ['sla', 'plazo', 'plazos', 'vencimiento', 'tiempo', 'demora', 'atraso'],
+    answer: 'Bio Asist controla automáticamente los **plazos (SLA)** de cada etapa:\n\n⚡ **Acción Inmediata**: 48 horas desde la creación\n🔬 **Análisis de Causa**: 15 días hábiles\n📝 **Plan Correctivo**: 10 días hábiles\n✅ **Verificación**: 7 días post-cierre\n🎯 **Efectividad**: 1 mes post-cierre\n\nCuando un plazo se vence, el hallazgo aparece en rojo con alerta de "Vencido".',
+    relatedModule: '/calidad',
+  },
+  {
+    keywords: ['exportar', 'pdf', 'excel', 'descargar', 'reporte', 'imprimir'],
+    answer: 'Podés exportar datos desde varios módulos:\n\n📄 **PDF**: Genera un reporte visual con KPIs y tabla de hallazgos. Ideal para auditorías.\n📊 **Excel**: Exporta datos completos con resumen automático. Ideal para análisis.\n\nUsá los botones **"Exportar"** en el Dashboard de Calidad o en Métricas.',
+    relatedModule: '/metricas',
+    followUp: ['¿Dónde están las métricas?'],
+  },
+  {
+    keywords: ['whatsapp', 'mensaje', 'notificar', 'wa', 'enviar mensaje'],
+    answer: 'Bio Asist incluye integración con **WhatsApp** para notificaciones automáticas:\n\n📱 Cuando se deriva un hallazgo, el responsable recibe un mensaje con el link de resolución.\n🔔 Se envían recordatorios de vencimiento.\n✅ El sistema registra si el mensaje fue enviado, entregado y leído.\n\nEn la versión completa se usa **BuilderBot Cloud API** para el envío automatizado.',
+    followUp: ['¿Cómo se deriva un hallazgo?'],
+  },
+  {
+    keywords: ['derivar', 'derivacion', 'asignar', 'responsable', 'enviar'],
+    answer: 'Para **derivar** un hallazgo a un responsable:\n\n1. Abrí el detalle del hallazgo\n2. Hacé clic en **"Derivar"**\n3. Seleccioná el sector y los responsables\n4. El sistema envía notificación automática por WhatsApp\n\nPodés derivar a **múltiples sectores y personas** simultáneamente (derivación multi-sector).',
+    relatedModule: '/calidad',
+    followUp: ['¿Qué es la derivación multi-sector?'],
+  },
+  {
+    keywords: ['multi sector', 'multisector', 'varios sectores', 'derivacion multiple'],
+    answer: 'La **derivación multi-sector** permite enviar un hallazgo a varios responsables de diferentes sectores al mismo tiempo:\n\n• Seleccionás sectores individuales o "Enviar a todos"\n• Cada responsable recibe su propia notificación por WhatsApp\n• Todas las respuestas se consolidan en el mismo caso\n• Ideal para problemas que afectan a múltiples áreas',
+    relatedModule: '/calidad',
+  },
+  {
+    keywords: ['matriz riesgo', 'riesgo', 'impacto', 'seguridad paciente'],
+    answer: 'La **Matriz de Riesgo** identifica hallazgos que podrían afectar la seguridad:\n\n🔴 Los hallazgos con impacto en la matriz se priorizan automáticamente\n📊 En Métricas podés ver el resumen: riesgos altos activos, medios y mitigados\n🔔 Estos hallazgos generan alertas especiales\n\nMarcar "Impacto en Matriz de Riesgo" al crear un hallazgo activa este seguimiento.',
+    relatedModule: '/metricas',
+  },
+  {
+    keywords: ['mis casos', 'mi panel', 'mis hallazgos', 'asignados'],
+    answer: 'El panel de **Mis Casos** te muestra únicamente los hallazgos asignados a tu sector:\n\n📋 **Vista filtrada**: Solo ves lo que te corresponde\n📊 **KPIs personalizadas**: Total, Pendientes, Resueltos, Urgentes\n🏷️ **Agrupación por sector**: Para entender de dónde viene cada caso\n\nAccedé desde el sidebar: **Calidad → Mis Casos**.',
+    relatedModule: '/calidad/mis-casos',
+    followUp: ['¿Cómo veo el detalle de un caso?'],
+  },
+  {
+    keywords: ['grow labs', 'empresa', 'desarrollador', 'quien hizo'],
+    answer: '**Grow Labs** es la empresa de desarrollo tecnológico que creó Bio Asist. Nos especializamos en:\n\n🏥 Sistemas de gestión para el sector salud\n📊 Dashboards de calidad y operaciones\n🤖 Automatización con IA y bots\n📱 Integración con WhatsApp y canales digitales\n\nBio Asist es nuestro ecosistema insignia para gestión de plantas de esterilización.',
+  },
+  {
+    keywords: ['dashboard', 'panel', 'pantalla principal', 'inicio'],
+    answer: 'El **Dashboard** es la pantalla principal de cada módulo. Muestra:\n\n📊 **KPIs**: Indicadores clave en tarjetas visuales\n📋 **Lista**: Todos los registros con filtros\n🔍 **Búsqueda**: Buscá por ID, descripción o sector\n📌 **Filtros**: Por estado, sector, prioridad y fecha\n\nHacé clic en cualquier registro para ver su detalle completo.',
+    relatedModule: '/calidad',
+  },
+  {
+    keywords: ['evidencia', 'foto', 'imagen', 'adjuntar', 'archivo'],
+    answer: 'Podés **adjuntar evidencia** a cada hallazgo:\n\n📸 **Al crear**: Arrastrá fotos o archivos al formulario\n📎 **Durante la resolución**: Cada etapa permite adjuntar evidencia\n✅ **Al cerrar**: Se puede adjuntar evidencia de resolución\n\nLas evidencias quedan asociadas al código de seguimiento y son trazables.',
+    relatedModule: '/calidad/nuevo',
+  },
+  {
+    keywords: ['5s', 'cinco s', 'ronda', 'orden', 'limpieza'],
+    answer: 'Las **rondas 5S** son inspecciones de orden y limpieza que generan hallazgos:\n\n1️⃣ **Seiri** (Clasificar): Separar lo necesario\n2️⃣ **Seiton** (Ordenar): Un lugar para cada cosa\n3️⃣ **Seiso** (Limpiar): Limpieza como inspección\n4️⃣ **Seiketsu** (Estandarizar): Mantener normas\n5️⃣ **Shitsuke** (Disciplina): Hábito de mejora\n\nLos hallazgos 5S se registran con origen "5S" en el sistema.',
+    relatedModule: '/calidad/nuevo',
+  },
+  {
+    keywords: ['reincidencia', 'repetido', 'recurrente', 'vuelve a pasar'],
+    answer: 'El **Índice de Reincidencia** mide cuántos hallazgos similares se repiten en un sector:\n\n📊 Se calcula por sector y tipo de hallazgo\n⚠️ Un índice alto (>20%) indica que las acciones correctivas no fueron efectivas\n🔄 El sistema recomienda revisar el análisis de causa raíz\n\nPodés ver este indicador en el módulo de **Métricas**.',
+    relatedModule: '/metricas',
+  },
+  {
+    keywords: ['modulo', 'modulos', 'que modulos', 'secciones', 'areas'],
+    answer: 'Bio Asist tiene **5 módulos principales**:\n\n🛡️ **Calidad**: Gestión ISO 9001 (hallazgos, NC, mejoras)\n🚚 **Logística**: Portal de pedidos y entregas\n🚗 **Flota**: Vehículos, combustible y mantenimiento\n💰 **Facturación**: Servicios, cobros y facturas\n📊 **Métricas**: KPIs, gráficos y reportes\n\nNavegá entre ellos usando el **sidebar izquierdo**.',
+    followUp: ['¿Cómo funciona Calidad?', '¿Qué puedo ver en Métricas?'],
+  },
+  {
+    keywords: ['esterilizacion', 'autoclave', 'lavado', 'instrumental'],
+    answer: 'Bio Asist está diseñado para **plantas de procesamiento de instrumental médico**. Los procesos que gestiona son:\n\n🧼 **Lavado**: Limpieza ultrasónica y manual del instrumental\n♨️ **Esterilización**: Autoclaves con control de indicadores\n📦 **Preparación y Armado**: Ensamblado de sets quirúrgicos\n🚚 **Distribución**: Entrega a hospitales y clínicas\n\nEl sistema de Calidad monitorea cada etapa.',
+    relatedModule: '/calidad',
   },
 ];
 

@@ -20,6 +20,7 @@ export const FINDING_ORIGINS = [
   { value: '5s', label: '5S', icon: '🏷️' },
   { value: 'queja_cliente', label: 'Queja de Cliente', icon: '📞' },
   { value: 'deteccion_espontanea', label: 'Detección Espontánea', icon: '👁️' },
+  { value: 'reclamo_formal', label: 'Reclamo Formal', icon: '📋' },
 ] as const;
 
 export const FINDING_TYPES = [
@@ -27,6 +28,7 @@ export const FINDING_TYPES = [
   { value: 'no_conformidad', label: 'No Conformidad', color: 'red' },
   { value: 'evento_adverso', label: 'Evento Adverso', color: 'red' },
   { value: 'cuasi_evento', label: 'Cuasi Evento', color: 'amber' },
+  { value: 'reclamo_cliente', label: 'Reclamo de Cliente', color: 'orange' },
 ] as const;
 
 export const FINDING_STATUSES = [
