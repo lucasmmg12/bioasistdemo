@@ -123,7 +123,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Animated video background */}
       <div className="sidebar-adm__video-bg">
         <video
-          src="/Nurse_inspecting_medical_instrum_202606111228.mp4"
+          src="/nurse_medical_instruments.mp4"
           autoPlay
           loop
           muted
