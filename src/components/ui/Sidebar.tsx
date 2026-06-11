@@ -12,6 +12,7 @@ import {
   ChevronDown,
   LogOut,
   BookOpen,
+  Home,
 } from 'lucide-react';
 import { MOCK_FINDINGS } from '../../data/mockData';
 
@@ -190,9 +191,20 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* ── Navigation ── */}
       <nav className="sidebar-adm__nav">
         {/* Collapsible Modules group */}
+        {/* Home link (collapsed) */}
         {collapsed ? (
-          // When collapsed, show icons only
-          NAV_ITEMS.map((item) => {
+          <>
+            <NavLink
+              to="/home"
+              className={({ isActive }) =>
+                `sidebar-adm__item ${isActive ? 'sidebar-adm__item--active' : ''}`
+              }
+              title="Inicio"
+            >
+              <Home size={20} className="sidebar-adm__item-icon" />
+            </NavLink>
+            {/* When collapsed, show icons only */}
+            {NAV_ITEMS.map((item) => {
             const badgeCount = item.badge();
             return (
               <NavLink
@@ -209,9 +221,22 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 )}
               </NavLink>
             );
-          })
+          })}
+          </>
         ) : (
           <div style={{ marginBottom: '4px' }}>
+            {/* Home link */}
+            <NavLink
+              to="/home"
+              className={({ isActive }) =>
+                `sidebar-adm__item ${isActive ? 'sidebar-adm__item--active' : ''}`
+              }
+              style={{ marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 16px', fontSize: '0.85rem' }}
+            >
+              <Home size={20} className="sidebar-adm__item-icon" />
+              <span>Inicio</span>
+            </NavLink>
+
             <button
               onClick={() => setModulesOpen(prev => !prev)}
               className="sidebar-adm__group-btn"

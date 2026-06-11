@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useState } from 'react';
 import { MockAuthProvider } from './contexts/MockAuthContext';
 import { FindingsProvider } from './contexts/FindingsContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Sidebar } from './components/ui/Sidebar';
 import { TopBar } from './components/ui/TopBar';
 import { QualityDashboard } from './components/calidad/QualityDashboard';
@@ -16,6 +17,8 @@ import { PublicReportForm } from './pages/PublicReportForm';
 import { PublicTrackingPage } from './pages/PublicTrackingPage';
 import { ResolutionPage } from './pages/ResolutionPage';
 import { ProceduresManual } from './pages/ProceduresManual';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
 import { TutorialProvider } from './components/ui/TutorialSystem';
 
 function DashboardLayout() {
@@ -24,7 +27,7 @@ function DashboardLayout() {
 
   return (
     <TutorialProvider>
-    <div className="min-h-screen bg-bio-neutral">
+    <div className="min-h-screen bg-bio-neutral dark:bg-slate-900 transition-colors duration-300">
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
@@ -56,7 +59,10 @@ function DashboardLayout() {
         <main className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
           <Routes>
             {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/calidad" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+
+            {/* Home */}
+            <Route path="/home" element={<HomePage />} />
 
             {/* Calidad */}
             <Route path="/calidad" element={<QualityDashboard />} />
@@ -79,17 +85,17 @@ function DashboardLayout() {
             <Route path="/manual" element={<ProceduresManual />} />
 
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/calidad" replace />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-200/60 bg-white/30 backdrop-blur-md mt-12">
-          <div className="max-w-[1400px] mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400 font-medium">
+        <footer className="border-t border-slate-200/60 dark:border-slate-700/60 bg-white/30 dark:bg-slate-800/30 backdrop-blur-md mt-12 transition-colors duration-300">
+          <div className="max-w-[1400px] mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400 dark:text-slate-500 font-medium">
             <p>© {new Date().getFullYear()} Bio Asist — Ecosistema Digital de Gestión</p>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-bio-secondary animate-pulse" />
-              <span>Desarrollado por <strong className="text-bio-primary">Grow Labs</strong></span>
+              <span>Desarrollado por <strong className="text-bio-primary dark:text-bio-secondary">Grow Labs</strong></span>
             </div>
           </div>
         </footer>
@@ -103,21 +109,49 @@ function DashboardLayout() {
 }
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('bio-auth') === 'true';
+  });
+
+  const handleLogin = () => {
+    sessionStorage.setItem('bio-auth', 'true');
+    setIsAuthenticated(true);
+  };
+
   return (
     <Router>
-      <MockAuthProvider>
-        <FindingsProvider>
-          <Routes>
-            {/* Public pages — full screen, no sidebar */}
-            <Route path="/reportar" element={<PublicReportForm />} />
-            <Route path="/seguimiento" element={<PublicTrackingPage />} />
-            <Route path="/resolver/:trackingId" element={<ResolutionPage />} />
+      <ThemeProvider>
+        <MockAuthProvider>
+          <FindingsProvider>
+            <Routes>
+              {/* Login */}
+              <Route
+                path="/login"
+                element={
+                  isAuthenticated
+                    ? <Navigate to="/home" replace />
+                    : <LoginPage onLogin={handleLogin} />
+                }
+              />
 
-            {/* Dashboard — with sidebar layout */}
-            <Route path="/*" element={<DashboardLayout />} />
-          </Routes>
-        </FindingsProvider>
-      </MockAuthProvider>
+              {/* Public pages — full screen, no sidebar */}
+              <Route path="/reportar" element={<PublicReportForm />} />
+              <Route path="/seguimiento" element={<PublicTrackingPage />} />
+              <Route path="/resolver/:trackingId" element={<ResolutionPage />} />
+
+              {/* Dashboard — with sidebar layout (auth required) */}
+              <Route
+                path="/*"
+                element={
+                  isAuthenticated
+                    ? <DashboardLayout />
+                    : <Navigate to="/login" replace />
+                }
+              />
+            </Routes>
+          </FindingsProvider>
+        </MockAuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

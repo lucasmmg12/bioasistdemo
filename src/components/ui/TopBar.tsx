@@ -1,13 +1,15 @@
 import { Bell, Search, ChevronRight, Menu, Sun, Moon } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { TutorialButton } from './TutorialSystem';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface TopBarProps {
   onMobileMenuToggle: () => void;
 }
 
 const BREADCRUMB_MAP: Record<string, string> = {
+  '/home': 'Inicio',
   '/calidad': 'Gestión de Calidad',
   '/calidad/nuevo': 'Nuevo Hallazgo',
   '/calidad/mis-casos': 'Mis Casos',
@@ -19,17 +21,19 @@ const BREADCRUMB_MAP: Record<string, string> = {
 };
 
 const MOCK_NOTIFICATIONS = [
-  { id: 1, text: '⏳ El hallazgo BA-2026-O5P6 vence hoy', time: 'Hace 2 horas', unread: true },
-  { id: 2, text: '✅ Ana Fernández respondió al caso BA-2026-I9J0', time: 'Hace 3 horas', unread: true },
-  { id: 3, text: '📋 Nuevo hallazgo de auditoría externa registrado', time: 'Hoy 09:30', unread: false },
-  { id: 4, text: '🔔 Recordatorio: 2 hallazgos próximos a vencer', time: 'Ayer 09:00', unread: false },
+  { id: 1, text: '⏳ El hallazgo BA-2026-O5P6 vence hoy', time: 'Hace 2 min', unread: true, link: '/calidad' },
+  { id: 2, text: '✅ Ana Fernández respondió al caso BA-2026-I9J0', time: 'Hace 15 min', unread: true, link: '/calidad' },
+  { id: 3, text: '📋 Nuevo hallazgo de auditoría externa registrado', time: 'Hace 1 hora', unread: true, link: '/calidad/nuevo' },
+  { id: 4, text: '🚚 Orden de retiro #ORD-007 asignada al conductor', time: 'Hace 2 horas', unread: false, link: '/logistica' },
+  { id: 5, text: '🔧 Vehículo AB-123-CD requiere service en 200 km', time: 'Hace 3 horas', unread: false, link: '/flota' },
+  { id: 6, text: '🔔 Recordatorio: 2 hallazgos próximos a vencer', time: 'Ayer 09:00', unread: false, link: '/calidad' },
 ];
 
 export function TopBar({ onMobileMenuToggle }: TopBarProps) {
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDark: darkMode, toggleTheme } = useTheme();
 
   const currentPath = location.pathname;
   const pageTitle = BREADCRUMB_MAP[currentPath] || 'Dashboard';
@@ -116,7 +120,7 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
 
         {/* Dark Mode Toggle */}
         <button
-          onClick={() => setDarkMode(d => !d)}
+          onClick={toggleTheme}
           title={darkMode ? 'Modo claro' : 'Modo oscuro'}
           style={{
             width: '34px', height: '34px', borderRadius: '10px',
@@ -124,7 +128,7 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
             border: `1px solid ${darkMode ? '#334155' : '#E2E8F0'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: darkMode ? '#FBBF24' : '#94A3B8',
-            transition: 'all 0.2s',
+            transition: 'all 0.3s',
           }}
         >
           {darkMode ? <Sun size={16} /> : <Moon size={16} />}
@@ -154,13 +158,20 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
                 </div>
                 <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                   {MOCK_NOTIFICATIONS.map((notif) => (
-                    <div
+                    <Link
                       key={notif.id}
-                      className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${notif.unread ? 'bg-bio-primary/3' : ''}`}
+                      to={notif.link}
+                      onClick={() => setShowNotifications(false)}
+                      className={`block p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${notif.unread ? 'bg-bio-primary/3' : ''}`}
                     >
-                      <p className="text-sm text-slate-700 leading-snug">{notif.text}</p>
-                      <p className="text-[10px] text-slate-400 font-medium mt-1">{notif.time}</p>
-                    </div>
+                      <div className="flex items-start gap-3">
+                        {notif.unread && <span className="w-2 h-2 rounded-full bg-bio-primary mt-1.5 shrink-0 animate-pulse" />}
+                        <div className={notif.unread ? '' : 'pl-5'}>
+                          <p className="text-sm text-slate-700 leading-snug">{notif.text}</p>
+                          <p className="text-[10px] text-slate-400 font-medium mt-1">{notif.time}</p>
+                        </div>
+                      </div>
+                    </Link>
                   ))}
                 </div>
                 <div className="p-3 bg-slate-50 text-center">
