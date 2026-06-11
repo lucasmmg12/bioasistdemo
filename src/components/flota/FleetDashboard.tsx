@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import {
-  Car, Fuel, Wrench, MapPin, AlertTriangle, CheckCircle2,
-  Gauge, Calendar, DollarSign, Navigation, TrendingUp,
-  ChevronRight, X, Droplets
+  Car, Fuel, Wrench, AlertTriangle, CheckCircle2,
+  Gauge, DollarSign, TrendingUp,
+  ChevronRight, Droplets
 } from 'lucide-react';
 import { MOCK_VEHICLES } from '../../data/mockData';
 import { KpiCard } from '../ui/KpiCard';

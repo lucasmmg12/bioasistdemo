@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import {
-  Receipt, DollarSign, Clock, CheckCircle2, FileText,
-  TrendingUp, ChevronRight, Building2, Calendar, Filter,
+  Receipt, Clock, CheckCircle2, FileText,
+  TrendingUp, Building2, Calendar, Filter,
   AlertTriangle, CreditCard, Banknote
 } from 'lucide-react';
 import { MOCK_BILLING } from '../../data/mockData';

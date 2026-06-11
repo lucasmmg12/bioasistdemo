@@ -40,7 +40,7 @@ export function PublicReportForm() {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files).filter(f => f.size <= 5 * 1024 * 1024);
       if (newFiles.length > 0) {
-        setFiles(prev => [...prev, ...newFiles]);
+        setFiles((prev: File[]) => [...prev, ...newFiles]);
         setPreviewUrls(prev => [...prev, ...newFiles.map(f => URL.createObjectURL(f))]);
       }
     }
@@ -48,7 +48,7 @@ export function PublicReportForm() {
 
   const removeFile = (index: number) => {
     URL.revokeObjectURL(previewUrls[index]);
-    setFiles(prev => prev.filter((_, i) => i !== index));
+    setFiles((prev: File[]) => prev.filter((_, i) => i !== index));
     setPreviewUrls(prev => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -110,6 +110,7 @@ export function PublicReportForm() {
       origin: 'deteccion_espontanea',
       sede: 'planta',
       sector: formData.sector,
+      reporter_sector: formData.reporterSector,
       priority: 'yellow',
       status: 'pending',
       description: formData.content,
@@ -121,6 +122,8 @@ export function PublicReportForm() {
       deadline_analysis: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
       is_propagable: false,
       propagated_sectors: [],
+      evidence_urls: files.map(f => URL.createObjectURL(f)),
+      resolution_evidence_urls: [] as string[],
       risk_matrix_impact: false,
       notes: `[${ts}] 📥 REPORTE RECIBIDO: Hallazgo creado desde formulario público${!isAnonymous ? ` por ${formData.contactName}` : ' (anónimo)'}`,
     };
@@ -163,7 +166,7 @@ export function PublicReportForm() {
           )}
 
           <div className="flex flex-col gap-3">
-            <button onClick={() => { setSuccessId(null); setFormData({ reporterSector: '', sector: '', type: 'no_conformidad', content: '', contactName: '', contactNumber: '' }); setFiles([]); setPreviewUrls([]); setIsAnonymous(false); }} className="w-full py-3 bg-bio-primary text-white rounded-xl font-bold hover:bg-bio-primary/90 transition-all">
+            <button onClick={() => { setSuccessId(null); setFormData({ reporterSector: '', sector: '', type: 'no_conformidad', content: '', contactName: '', contactNumber: '' }); setFiles([] as File[]); setPreviewUrls([]); setIsAnonymous(false); }} className="w-full py-3 bg-bio-primary text-white rounded-xl font-bold hover:bg-bio-primary/90 transition-all">
               Enviar Nuevo Reporte
             </button>
             <Link to="/seguimiento" className="text-sm text-bio-primary font-bold hover:underline">Consultar estado de mi reporte →</Link>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   Shield,
   Truck,
@@ -11,8 +11,6 @@ import {
   Stethoscope,
   ChevronDown,
   LogOut,
-  Briefcase,
-  Plus,
   BookOpen,
 } from 'lucide-react';
 import { MOCK_FINDINGS } from '../../data/mockData';

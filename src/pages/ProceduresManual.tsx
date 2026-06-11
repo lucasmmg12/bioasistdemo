@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   BookOpen, ChevronRight, ChevronDown, Shield, FileText, Send, Users,
   CheckCircle2, AlertTriangle, Eye, Download, Search, Clock, Mic,
-  Lightbulb, Truck, Car, Receipt, BarChart3, ArrowLeft, Printer,
+  Lightbulb, Truck, Car, Receipt, BarChart3, Printer,
   ExternalLink, Zap, XCircle, Phone,
 } from 'lucide-react';
 
@@ -282,7 +282,7 @@ export function ProceduresManual() {
       <div className="relative rounded-2xl mb-6 overflow-hidden" style={{ minHeight: '220px' }}>
         {/* Background Video */}
         <video
-          src="/Nurse_inspecting_medical_instrum…_202606111228.mp4"
+          src="/nurse_medical_instruments.mp4"
           autoPlay
           loop
           muted

@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  Loader2, CheckCircle2, XCircle, AlertTriangle, X, Send, Download,
-  Clock, Mic, Square, Paperclip, ChevronRight, ChevronDown,
+  Loader2, CheckCircle2, XCircle, AlertTriangle, X, Send,
+  Clock, Mic, Square, Paperclip, ChevronRight,
   Zap, Search as SearchIcon, FileText, Calendar,
 } from 'lucide-react';
 import { useFindings } from '../contexts/FindingsContext';
@@ -32,7 +32,6 @@ export function ResolutionPage() {
   const [rejected, setRejected] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [expandedLog, setExpandedLog] = useState<number | null>(null);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
 
   // Form data
@@ -49,7 +48,7 @@ export function ResolutionPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Whether this finding needs deep analysis (NC/adverse)
-  const needsRCA = finding && (finding.type === 'no_conformidad' || finding.type === 'evento_adverso' || finding.type === 'reclamo_formal');
+  const needsRCA = finding && (finding.type === 'no_conformidad' || finding.type === 'evento_adverso' || finding.type === 'reclamo_cliente');
 
   // Load finding
   useEffect(() => {

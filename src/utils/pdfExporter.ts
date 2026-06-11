@@ -8,9 +8,7 @@ const ACCENT = [16, 185, 129] as const;  // #10B981
 const GRAY = [100, 116, 139] as const;
 const LIGHT_GRAY = [226, 232, 240] as const;
 const WHITE = [255, 255, 255] as const;
-const RED = [239, 68, 68] as const;
-const AMBER = [245, 158, 11] as const;
-const GREEN = [34, 197, 94] as const;
+
 
 // ── Helper functions ──
 function formatDate(dateStr?: string): string {
