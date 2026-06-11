@@ -279,34 +279,49 @@ export function ProceduresManual() {
   return (
     <div className="space-y-0">
       {/* Header */}
-      <div className="bg-gradient-to-br from-bio-primary to-bio-primary/80 text-white rounded-2xl p-6 md:p-8 mb-6 relative overflow-hidden">
+      <div className="relative rounded-2xl mb-6 overflow-hidden" style={{ minHeight: '220px' }}>
+        {/* Background Video */}
+        <video
+          src="/Nurse_inspecting_medical_instrum…_202606111228.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Dark overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
+        {/* Decorative circles */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-5 h-5" />
+        {/* Content */}
+        <div className="relative p-6 md:p-8 text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
+              <BookOpen className="w-6 h-6" />
             </div>
-            <span className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest">
-              ISO 9001:2015
+            <span className="px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-[10px] font-bold uppercase tracking-widest border border-white/10">
+              Gestión de Calidad
             </span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-2">Manual de Procedimientos</h1>
-          <p className="text-white/70 font-medium max-w-xl">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-3 drop-shadow-lg">
+            Manual de Procedimientos
+          </h1>
+          <p className="text-lg text-white/90 font-medium max-w-xl drop-shadow-md">
             Guía completa de procesos, flujos de trabajo y protocolos del sistema Bio Asist.
           </p>
           <div className="flex items-center gap-4 mt-4">
-            <span className="text-xs font-bold text-white/50">Versión 1.0</span>
-            <span className="text-xs text-white/50">•</span>
-            <span className="text-xs text-white/50">Junio 2026</span>
-            <span className="text-xs text-white/50">•</span>
-            <span className="text-xs text-white/50">Grow Labs</span>
+            <span className="text-xs font-bold text-white/60">Versión 1.0</span>
+            <span className="text-xs text-white/40">•</span>
+            <span className="text-xs text-white/60">Junio 2026</span>
+            <span className="text-xs text-white/40">•</span>
+            <span className="text-xs text-white/60">Grow Labs</span>
           </div>
           <div className="flex items-center gap-3 mt-6">
-            <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-xs font-bold hover:bg-white/20 transition-all">
+            <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2.5 bg-white/15 backdrop-blur-sm rounded-xl text-xs font-bold hover:bg-white/25 transition-all border border-white/10">
               <Printer className="w-4 h-4" /> Imprimir
             </button>
-            <Link to="/reportar" className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-xs font-bold hover:bg-white/20 transition-all">
+            <Link to="/reportar" className="flex items-center gap-2 px-4 py-2.5 bg-white/15 backdrop-blur-sm rounded-xl text-xs font-bold hover:bg-white/25 transition-all border border-white/10">
               <ExternalLink className="w-4 h-4" /> Ir al Formulario Público
             </Link>
           </div>
