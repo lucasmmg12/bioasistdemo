@@ -127,7 +127,7 @@ export function HomePage() {
                 Ecosistema Digital
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-1">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-1 text-white">
               {getGreeting()}, {user.name.split(' ')[0]} 👋
             </h1>
             <p className="text-white/80 font-medium text-base">
