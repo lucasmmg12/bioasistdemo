@@ -1,4 +1,4 @@
-import { Bell, Search, ChevronRight, Menu, Sun, Moon } from 'lucide-react';
+import { Bell, Search, ChevronRight, Menu, Sun, Moon, ExternalLink, Copy, CheckCircle2 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { TutorialButton } from './TutorialSystem';
@@ -34,6 +34,7 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { isDark: darkMode, toggleTheme } = useTheme();
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const currentPath = location.pathname;
   const pageTitle = BREADCRUMB_MAP[currentPath] || 'Dashboard';
@@ -41,6 +42,23 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
 
   const titleText = 'Bio Asist';
   const subtitleText = 'Ecosistema Digital';
+
+  const handleCopyPublicLink = async () => {
+    const publicUrl = `${window.location.origin}/reportar`;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+    } catch {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = publicUrl;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2500);
+  };
 
   return (
     <header className="topbar-adm">
@@ -114,6 +132,23 @@ export function TopBar({ onMobileMenuToggle }: TopBarProps) {
             />
           </div>
         </div>
+
+        {/* Public Report Link */}
+        <button
+          onClick={handleCopyPublicLink}
+          title="Copiar link público de reportes"
+          className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all duration-300 cursor-pointer ${
+            linkCopied
+              ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+              : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+          }`}
+        >
+          {linkCopied ? (
+            <><CheckCircle2 size={13} /> ¡Link copiado!</>
+          ) : (
+            <><ExternalLink size={13} /> Link Público<Copy size={11} className="opacity-50" /></>
+          )}
+        </button>
 
         {/* Tutorial Button */}
         <TutorialButton />
