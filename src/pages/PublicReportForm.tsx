@@ -189,18 +189,20 @@ export function PublicReportForm() {
             loop
             muted
             playsInline
-            className="w-full h-full object-cover opacity-15"
+            className="w-full h-full object-cover opacity-10"
           />
         </div>
+        {/* Dark overlay for text legibility */}
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-bio-primary/80 via-bio-primary/60 to-bio-primary/80" />
         {/* Accent gradient line at top */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 z-10" />
-        <div className="max-w-3xl mx-auto flex items-center gap-4 relative z-[1]">
+        <div className="max-w-3xl mx-auto flex items-center gap-4 relative z-[2]">
           <Link to="/calidad" className="p-2 hover:bg-white/10 rounded-xl transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight">Reportar Hallazgo</h1>
-            <p className="text-white/70 text-sm font-medium">Tu voz es el motor de nuestra mejora continua.</p>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>Reportar Hallazgo</h1>
+            <p className="text-white/80 text-sm font-medium drop-shadow-sm">Tu voz es el motor de nuestra mejora continua.</p>
           </div>
         </div>
       </div>
