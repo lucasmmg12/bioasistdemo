@@ -49,14 +49,14 @@ function DashboardLayout() {
 
       {/* Main content */}
       <div
-        className="transition-all duration-300"
+        className="transition-all duration-300 ml-0 md:ml-[var(--sidebar-width)]"
         style={{
-          marginLeft: sidebarCollapsed ? '72px' : '260px',
-        }}
+          '--sidebar-width': sidebarCollapsed ? '72px' : '260px',
+        } as React.CSSProperties}
       >
         <TopBar onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} />
 
-        <main className="p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
+        <main className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto">
           <Routes>
             {/* Default redirect */}
             <Route path="/" element={<Navigate to="/home" replace />} />

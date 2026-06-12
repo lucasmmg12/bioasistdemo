@@ -96,16 +96,16 @@ export function QualityDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-black text-bio-primary">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-bio-primary">
             Gestión de Calidad
           </h1>
-          <p className="text-slate-400 text-sm font-medium mt-1">
+          <p className="text-slate-400 text-xs sm:text-sm font-medium mt-1 hidden sm:block">
             Sistema de Acciones Correctivas y Oportunidades de Mejora — ISO 9001
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Export Dropdown */}
           <div className="relative">
             <button
@@ -189,7 +189,7 @@ export function QualityDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
         <KpiCard label="Total Activos" value={kpis.total} icon={<Shield className="w-5 h-5" />} color="primary" delay={0} />
         <KpiCard label="Pendientes" value={kpis.pending} icon={<Clock className="w-5 h-5" />} color="warning" delay={75} />
         <KpiCard label="En Proceso" value={kpis.inProgress} icon={<ArrowUpRight className="w-5 h-5" />} color="secondary" delay={150} />
@@ -198,10 +198,10 @@ export function QualityDashboard() {
       </div>
 
       {/* Filters bar */}
-      <div className="card p-4">
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
+      <div className="card p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           {/* Search */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative w-full sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
@@ -212,32 +212,33 @@ export function QualityDashboard() {
             />
           </div>
 
-          {/* Sector Filter */}
-          <select
-            value={sectorFilter}
-            onChange={(e) => setSectorFilter(e.target.value)}
-            className="input-field text-xs font-bold w-auto min-w-[140px]"
-          >
-            <option value="all">Todos los Sectores</option>
-            {SECTORS.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
-            ))}
-          </select>
+          {/* Sector + Priority Filters */}
+          <div className="flex gap-2 sm:gap-3">
+            <select
+              value={sectorFilter}
+              onChange={(e) => setSectorFilter(e.target.value)}
+              className="input-field text-xs font-bold flex-1 sm:flex-none sm:w-auto sm:min-w-[140px]"
+            >
+              <option value="all">Todos los Sectores</option>
+              {SECTORS.map(s => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
 
-          {/* Priority Filter */}
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="input-field text-xs font-bold w-auto min-w-[120px]"
-          >
-            <option value="all">Todas las Prioridades</option>
-            <option value="red">🔴 Alta</option>
-            <option value="yellow">🟡 Media</option>
-            <option value="green">🟢 Baja</option>
-          </select>
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="input-field text-xs font-bold flex-1 sm:flex-none sm:w-auto sm:min-w-[120px]"
+            >
+              <option value="all">Prioridad</option>
+              <option value="red">🔴 Alta</option>
+              <option value="yellow">🟡 Media</option>
+              <option value="green">🟢 Baja</option>
+            </select>
+          </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1 tabs-scroll-container">
             {TABS.map((tab) => (
               <button
                 key={tab.value}
@@ -274,32 +275,32 @@ export function QualityDashboard() {
               <div
                 key={finding.id}
                 onClick={() => setSelectedFinding(finding)}
-                className={`card p-4 md:p-5 cursor-pointer group animate-in fade-in slide-in-from-bottom-4 duration-300 ${overdue ? 'border-red-200 bg-red-50/30' : ''}`}
+                className={`card p-3 sm:p-4 md:p-5 cursor-pointer group animate-in fade-in slide-in-from-bottom-4 duration-300 ${overdue ? 'border-red-200 bg-red-50/30' : ''}`}
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
-                <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-                  {/* Priority indicator */}
-                  <div className={`w-1.5 h-12 rounded-full hidden md:block flex-shrink-0 ${
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  {/* Priority indicator — mobile: top bar, desktop: side bar */}
+                  <div className={`h-1 sm:h-12 w-full sm:w-1.5 rounded-full flex-shrink-0 ${
                     finding.priority === 'red' ? 'bg-red-500' : finding.priority === 'yellow' ? 'bg-amber-500' : 'bg-emerald-500'
                   }`} />
 
                   {/* Main content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span className="text-xs font-mono font-bold text-bio-primary">{finding.tracking_id}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-1.5 flex-wrap">
+                      <span className="text-[10px] sm:text-xs font-mono font-bold text-bio-primary">{finding.tracking_id}</span>
                       <StatusBadge status={finding.status} pulse={overdue} />
                       <PriorityBadge priority={finding.priority} />
                       {overdue && (
-                        <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-red-100 text-red-700 border border-red-200 pulse-danger flex items-center gap-1">
-                          <AlertTriangle className="w-3 h-3" />
+                        <span className="px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-bold uppercase tracking-wider rounded-full bg-red-100 text-red-700 border border-red-200 pulse-danger flex items-center gap-0.5">
+                          <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                           Vencido
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-700 font-medium leading-snug line-clamp-2 group-hover:text-bio-primary transition-colors">
+                    <p className="text-xs sm:text-sm text-slate-700 font-medium leading-snug line-clamp-2 group-hover:text-bio-primary transition-colors">
                       {finding.description}
                     </p>
-                    <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-400 font-medium">
+                    <div className="flex items-center gap-2 sm:gap-4 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium flex-wrap">
                       <span className="flex items-center gap-1">
                         <Building2 className="w-3 h-3" />
                         {finding.sede === 'hospital' ? 'Hospital' : 'Planta'}
@@ -308,10 +309,10 @@ export function QualityDashboard() {
                         <MapPin className="w-3 h-3" />
                         {getSectorLabel(finding.sector)}
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-1 hidden sm:flex">
                         <Users className="w-3 h-3" />
                         {finding.assigned_to.length > 0
-                          ? `${finding.assigned_to.length} asignado${finding.assigned_to.length > 1 ? 's' : ''}`
+                          ? `${finding.assigned_to.length} asig.`
                           : 'Sin asignar'
                         }
                       </span>
@@ -323,7 +324,7 @@ export function QualityDashboard() {
                   </div>
 
                   {/* Right side: Progress + arrow */}
-                  <div className="flex items-center gap-4">
+                  <div className="hidden sm:flex items-center gap-4">
                     <div className="w-32 hidden lg:block">
                       <ProgressBar currentStatus={finding.status} compact />
                     </div>
@@ -764,7 +765,7 @@ function FindingDetail({ finding, onDerived, onValidated, onDiscarded, onReturne
       </div>
 
       {/* Action buttons */}
-      <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+      <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
         <button
           onClick={() => exportFindingToPDF(finding)}
           className="btn-secondary gap-1.5"

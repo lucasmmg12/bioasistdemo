@@ -180,8 +180,21 @@ export function PublicReportForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-bio-primary/5 via-white to-bio-secondary/5">
       {/* Header */}
-      <div className="bg-bio-primary text-white py-6 px-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-4">
+      <div className="bg-bio-primary text-white py-6 px-4 relative overflow-hidden">
+        {/* Video background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <video
+            src="/Blue_drop_moving_left_right_202606091400.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-15"
+          />
+        </div>
+        {/* Accent gradient line at top */}
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 z-10" />
+        <div className="max-w-3xl mx-auto flex items-center gap-4 relative z-[1]">
           <Link to="/calidad" className="p-2 hover:bg-white/10 rounded-xl transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>

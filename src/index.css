@@ -782,19 +782,65 @@
   border: 1px solid #D1FAE5;
 }
 
-/* ── Responsive for mobile ── */
+/* ═══════════════════════════════════════════
+   RESPONSIVE DESIGN — Mobile First
+   ═══════════════════════════════════════════ */
+
+/* ── Extra-small: <= 480px (phones) ── */
+@media (max-width: 480px) {
+  .topbar-adm {
+    padding: 0.75rem 0.75rem;
+    min-height: 52px;
+  }
+
+  .topbar-adm__title {
+    font-size: 0.9rem;
+  }
+
+  .topbar-adm__left > div > span {
+    display: none;
+  }
+
+  .card {
+    border-radius: 1rem;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent,
+  .btn-ghost,
+  .btn-danger {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
+  }
+
+  .input-field {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 0.75rem;
+  }
+
+  .label-text {
+    font-size: 0.65rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+/* ── Small-to-Medium: <= 768px (tablets & phones) ── */
 @media (max-width: 768px) {
+  /* Sidebar hidden by default on mobile */
   .sidebar-adm {
     transform: translateX(-100%);
-    transition: transform 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 260px !important;
   }
 
   .sidebar-adm.sidebar--mobile-open {
     transform: translateX(0);
-    width: 260px !important;
     z-index: 9998;
   }
 
+  /* Topbar mobile adaptations */
   .topbar-adm__mobile-menu {
     display: flex !important;
   }
@@ -805,5 +851,106 @@
 
   .topbar-adm__subtitle {
     display: none;
+  }
+
+  .topbar-adm {
+    padding: 0.75rem 1rem;
+  }
+
+  .topbar-adm__title {
+    font-size: 1rem;
+  }
+
+  /* KPI Cards — 2 columns, compact */
+  .kpi-grid-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Tabs — horizontal scroll with momentum */
+  .tabs-scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .tabs-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs-scroll-container > button {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+
+  /* Cards — reduce padding */
+  .card {
+    padding: 0.75rem;
+  }
+
+  /* Findings list items */
+  .finding-card-mobile {
+    padding: 0.75rem !important;
+  }
+
+  /* Footer */
+  footer .max-w-\\[1400px\\] {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* ── Medium-to-Large: 769px - 1024px (small laptops/tablets landscape) ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar-adm {
+    width: 72px;
+  }
+}
+
+/* ═══ Modal Full-Screen on Mobile ═══ */
+@media (max-width: 640px) {
+  .modal-responsive-container {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-responsive-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    max-height: 95vh !important;
+    border-radius: 1.25rem 1.25rem 0 0 !important;
+    margin: 0 !important;
+  }
+}
+
+/* ═══ Touch-Friendly Adjustments ═══ */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent,
+  .btn-ghost,
+  .btn-danger {
+    min-height: 44px;
+  }
+
+  .input-field,
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Disable hover effects on touch */
+  .card:hover {
+    transform: none;
+    box-shadow: var(--shadow-card);
+  }
+
+  .sidebar-adm__item:hover {
+    padding-left: 1rem;
+    border-left: none;
+    border-radius: 0.75rem;
   }
 }
